@@ -1,0 +1,29 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-web3pass}
+      MYSQL_DATABASE: web3_learning
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 10
+
+  app:
+    build: ./backend
+    environment:
+      PORT: "8080"
+      DB_DSN: "root:${MYSQL_ROOT_PASSWORD:-web3pass}@tcp(mysql:3306)/web3_learning?parseTime=true&charset=utf8mb4"
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
