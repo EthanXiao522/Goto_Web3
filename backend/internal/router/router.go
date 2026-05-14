@@ -2,6 +2,7 @@ package router
 
 import (
 	"database/sql"
+	"encoding/json"
 	"html/template"
 	"math"
 
@@ -28,8 +29,9 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 			return int(math.Round(float64(a) / float64(b) * 100))
 		},
 		"multiply": func(a float64, b float64) float64 { return a * b },
-		"phaseColor": func(num uint8) string {
-			switch num {
+		"phaseColor": func(num any) string {
+			n := toInt(num)
+			switch n {
 			case 1:
 				return "#00f0ff"
 			case 2:
@@ -39,8 +41,9 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 			}
 			return "#00f0ff"
 		},
-		"phaseColorClass": func(num uint8) string {
-			switch num {
+		"phaseColorClass": func(num any) string {
+			n := toInt(num)
+			switch n {
 			case 1:
 				return "cyan"
 			case 2:
@@ -49,6 +52,14 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 				return "green"
 			}
 			return "cyan"
+		},
+		"resourceURLs": func(raw string) []string {
+			var urls []string
+			if raw == "" || raw == "[]" {
+				return urls
+			}
+			json.Unmarshal([]byte(raw), &urls)
+			return urls
 		},
 		"ganttLeft": func(phaseNum uint8) float64 {
 			return float64(phaseNum-1) * 33.33
@@ -104,6 +115,7 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 	r.GET("/", pageHandler.Landing)
 	r.GET("/login", pageHandler.LoginPage)
 	r.GET("/register", pageHandler.RegisterPage)
+	r.GET("/demo", pageHandler.Demo)
 	r.GET("/logout", func(c *gin.Context) {
 		c.Redirect(302, "/")
 	})
@@ -144,5 +156,21 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 	}
 
 	return r
+}
+
+func toInt(v any) int {
+	switch n := v.(type) {
+	case int:
+		return n
+	case int64:
+		return int(n)
+	case uint8:
+		return int(n)
+	case uint64:
+		return int(n)
+	case float64:
+		return int(n)
+	}
+	return 0
 }
 

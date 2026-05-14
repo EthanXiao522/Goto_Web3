@@ -1651,6 +1651,55 @@ textarea.form-input {
 .flex-col { flex-direction: column; }
 .items-center { align-items: center; }
 .justify-between { justify-content: space-between; }
+
+/* --- Demo Page --- */
+.demo-banner {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+  color: #ffc107;
+  text-align: center;
+}
+.demo-page .phase-card,
+.demo-page .task-item { pointer-events: none; }
+
+/* --- Landing Page --- */
+.landing-header {
+  text-align: center;
+  padding: 60px 20px 20px;
+}
+.landing-demo-preview {
+  padding: 40px 20px;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  margin: 20px 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+.landing-footer {
+  text-align: center;
+  padding: 40px 20px 60px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.btn.btn-ghost {
+  background: transparent;
+  border: 1px dashed var(--border-color);
+  color: var(--text-secondary);
+}
+.btn.btn-ghost:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  background: rgba(0, 240, 255, 0.05);
+}
+
+/* --- Topbar left --- */
+.topbar-left {
+  display: flex;
+  align-items: center;
+}
 .gap-8 { gap: 8px; }
 .gap-12 { gap: 12px; }
 .gap-16 { gap: 16px; }

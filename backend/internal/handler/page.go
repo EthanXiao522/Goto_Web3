@@ -241,6 +241,47 @@ func (h *PageHandler) Handbook(c *gin.Context) {
 	}))
 }
 
+func (h *PageHandler) Demo(c *gin.Context) {
+	phases, _ := h.phaseRepo.GetAllWithProgress(0)
+	c.HTML(http.StatusOK, "demo.html", gin.H{
+		"Title":   "游客模式",
+		"Phases":  phases,
+		"MockData": mockDashboardData(),
+	})
+}
+
+func mockDashboardData() gin.H {
+	return gin.H{
+		"overview": gin.H{
+			"total_tasks":     215,
+			"completed_tasks": 87,
+			"total_phases":    3,
+			"completed_phases": 1,
+			"total_weeks":     12,
+			"completed_weeks": 3,
+		},
+		"phase_progress": []gin.H{
+			{"phase_id": 1, "phase_number": 1, "title": "基础夯实（第 1-4 周）", "task_count": 74, "completed_count": 52, "percentage": 70.0},
+			{"phase_id": 2, "phase_number": 2, "title": "核心系统（第 5-8 周）", "task_count": 69, "completed_count": 28, "percentage": 40.0},
+			{"phase_id": 3, "phase_number": 3, "title": "工程化与面试（第 9-12 周）", "task_count": 72, "completed_count": 7, "percentage": 10.0},
+		},
+		"week_progress": []gin.H{
+			{"week_number": 1, "title": "Go 并发 + EVM 基础", "task_count": 18, "completed_count": 18},
+			{"week_number": 2, "title": "Go 网络编程 + 区块扫描器", "task_count": 19, "completed_count": 16},
+			{"week_number": 3, "title": "Listener 升级", "task_count": 18, "completed_count": 12},
+			{"week_number": 4, "title": "Listener 打磨", "task_count": 19, "completed_count": 6},
+			{"week_number": 5, "title": "Kafka 深化", "task_count": 18, "completed_count": 0},
+		},
+		"recent_tasks": []gin.H{
+			{"content": "实现 WebSocket 自动重连 + 指数退避", "phase_title": "Phase 1 基础夯实", "week_number": 3, "is_completed": true, "completed_at": "2026-03-21 16:30"},
+			{"content": "创建 event_logs 表并解析 ERC-20 Transfer", "phase_title": "Phase 1 基础夯实", "week_number": 2, "is_completed": true, "completed_at": "2026-03-14 15:20"},
+			{"content": "实现 goroutine + channel 生产者-消费者模型", "phase_title": "Phase 1 基础夯实", "week_number": 1, "is_completed": true, "completed_at": "2026-03-07 11:45"},
+			{"content": "Kafka producer 集成到 Listener", "phase_title": "Phase 2 核心系统", "week_number": 5, "is_completed": false},
+			{"content": "设计 HD 钱包密钥管理方案", "phase_title": "Phase 2 核心系统", "week_number": 6, "is_completed": false},
+		},
+	}
+}
+
 func (h *PageHandler) baseData(c *gin.Context, title, active string, extra gin.H) gin.H {
 	userID := c.GetUint64("user_id")
 	user, _ := h.userRepo.FindByID(userID)

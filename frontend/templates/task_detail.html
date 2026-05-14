@@ -14,7 +14,7 @@
       <h2 class="task-title">{{.Task.Content}}</h2>
     </div>
     {{if .Task.ResourceURLs}}
-    <div class="task-resources-bar">资源：{{range .Task.ResourceURLs}}<a href="{{.}}" target="_blank" class="resource-link">{{.}}</a>{{end}}</div>
+    <div class="task-resources-bar">资源：{{range resourceURLs .Task.ResourceURLs}}<a href="{{.}}" target="_blank" class="resource-link">{{.}}</a>{{end}}</div>
     {{end}}
   </div>
   <div class="task-editor-card">

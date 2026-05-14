@@ -1,0 +1,151 @@
+{{define "demo-layout"}}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>游客模式 - Goto Web3</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="app-layout">
+  <aside class="sidebar open" id="sidebar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="折叠/展开侧边栏">◀</button>
+    <div class="sidebar-brand">
+      <div class="logo">GOTO WEB3</div>
+      <div class="logo-sub">游客体验模式</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">游客菜单</div>
+        <a href="/" style="color:var(--accent-cyan)">
+          <span class="nav-icon">⌂</span> 返回首页
+        </a>
+        <a href="/demo" class="active">
+          <span class="nav-icon">◈</span> 系统预览
+        </a>
+        <a href="/login" style="color:var(--accent-green)">
+          <span class="nav-icon">▶</span> 登录使用
+        </a>
+        <a href="/register" style="color:var(--accent-purple)">
+          <span class="nav-icon">✦</span> 注册账号
+        </a>
+      </div>
+    </nav>
+  </aside>
+  <div class="sidebar-edge-trigger" id="edgeTrigger" style="display:none" onclick="showSidebar()"></div>
+  <button class="sidebar-expand-btn" id="expandBtn" onclick="showSidebar()">☰</button>
+  <main class="main-content" id="mainContent">
+    <header class="topbar">
+      <div class="topbar-left">
+        <a href="/" class="btn btn-outline btn-sm" title="返回首页">&#8962; 首页</a>
+        <span class="breadcrumb" style="margin-left:12px">游客模式 · 系统功能预览（虚假数据）</span>
+      </div>
+      <div class="topbar-right">
+        <a href="/login" class="btn btn-primary btn-sm">登录</a>
+      </div>
+    </header>
+    <div id="toast-container"></div>
+{{end}}
+
+<div class="demo-page">
+  <div class="demo-banner">
+    <span>⚠ 游客模式：数据为示例数据，仅供功能预览。完整功能请 <a href="/register" style="color:var(--accent-cyan)">注册账号</a></span>
+  </div>
+
+  <h1 class="page-title">Dashboard 仪表盘</h1>
+  <div class="stats-grid">
+    <div class="stat-card card-glow-cyan">
+      <div class="stat-value">{{.MockData.overview.total_tasks}}</div>
+      <div class="stat-label">总任务数</div>
+    </div>
+    <div class="stat-card card-glow-green">
+      <div class="stat-value">{{.MockData.overview.completed_tasks}}</div>
+      <div class="stat-label">已完成</div>
+    </div>
+    <div class="stat-card card-glow-purple">
+      <div class="stat-value">{{.MockData.overview.completed_phases}}/{{.MockData.overview.total_phases}}</div>
+      <div class="stat-label">完成阶段</div>
+    </div>
+    <div class="stat-card card-glow-cyan">
+      <div class="stat-value">~40%</div>
+      <div class="stat-label">总体进度</div>
+    </div>
+  </div>
+
+  <h2 class="section-title">阶段进度</h2>
+  <div class="phase-rings">
+    {{range .MockData.phase_progress}}
+    <div class="phase-ring-card">
+      <svg width="120" height="120" viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border-color)" stroke-width="8"/>
+        <circle cx="60" cy="60" r="50" fill="none" stroke="{{phaseColor .phase_number}}" stroke-width="8"
+          stroke-dasharray="{{multiply .percentage 3.14159}}" stroke-dashoffset="0"
+          transform="rotate(-90 60 60)" stroke-linecap="round"/>
+        <text x="60" y="56" text-anchor="middle" fill="var(--text-primary)" font-size="18" font-weight="bold">{{printf "%.0f" .percentage}}%</text>
+        <text x="60" y="72" text-anchor="middle" fill="var(--text-muted)" font-size="10">{{.task_count}} 任务</text>
+      </svg>
+      <div class="phase-ring-label">Phase {{.phase_number}}</div>
+      <div class="phase-ring-title">{{.title}}</div>
+    </div>
+    {{end}}
+  </div>
+
+  <h2 class="section-title">每周进度（示例）</h2>
+  <div class="week-progress-list">
+    {{range .MockData.week_progress}}
+    <div class="week-progress-item">
+      <div class="week-progress-header">
+        <span>第{{.week_number}}周 · {{.title}}</span>
+        <span>{{.completed_count}}/{{.task_count}}</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:{{if .task_count}}{{percent .completed_count .task_count}}{{else}}0{{end}}%"></div>
+      </div>
+    </div>
+    {{end}}
+  </div>
+
+  <h2 class="section-title">最近活动（示例）</h2>
+  <div class="recent-list">
+    {{range .MockData.recent_tasks}}
+    <div class="recent-item">
+      <span class="recent-status {{if .is_completed}}done{{else}}pending{{end}}">{{if .is_completed}}✓{{else}}○{{end}}</span>
+      <div class="recent-info">
+        <div class="recent-content">{{.content}}</div>
+        <div class="recent-meta">{{.phase_title}} · 第{{.week_number}}周{{if .completed_at}} · {{.completed_at}}{{end}}</div>
+      </div>
+    </div>
+    {{end}}
+  </div>
+
+  <h2 class="section-title">任务计划</h2>
+  <div class="phase-cards-grid" style="pointer-events:none;opacity:0.8">
+    {{range .Phases}}
+    <div class="phase-card card-glow-{{phaseColorClass .PhaseNumber}}">
+      <div class="phase-card-header">
+        <span class="phase-badge phase-badge-{{.PhaseNumber}}">Phase {{.PhaseNumber}}</span>
+        <span class="phase-progress-text">--</span>
+      </div>
+      <h3 class="phase-card-title">{{.Title}}</h3>
+      {{if .Subtitle}}<p class="phase-card-subtitle">{{.Subtitle}}</p>{{end}}
+      <div class="phase-card-stats"><span>{{.TaskCount}} 个任务</span></div>
+    </div>
+    {{end}}
+  </div>
+
+  <div style="text-align:center;margin:32px 0 48px">
+    <p style="color:var(--text-muted);margin-bottom:12px">以上为游客模式预览，登录后可追踪真实进度</p>
+    <a href="/register" class="btn btn-primary btn-lg">注册账号</a>
+    <a href="/login" class="btn btn-outline btn-lg" style="margin-left:8px">登录</a>
+  </div>
+</div>
+
+{{define "demo-layout-end"}}
+  </main>
+</div>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
+{{end}}

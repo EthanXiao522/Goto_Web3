@@ -14,7 +14,7 @@
           <span class="checkmark"></span>
           <span class="task-content">{{.Content}}</span>
         </label>
-        {{if .ResourceURLs}}<div class="task-resources">{{range .ResourceURLs}}<a href="{{.}}" target="_blank" class="resource-link">📎</a>{{end}}</div>{{end}}
+        {{if .ResourceURLs}}<div class="task-resources">{{range resourceURLs .ResourceURLs}}<a href="{{.}}" target="_blank" class="resource-link">📎</a>{{end}}</div>{{end}}
         <a href="/tasks/{{.ID}}" class="task-detail-link">详情 →</a>
       </div>
       {{end}}

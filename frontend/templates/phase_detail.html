@@ -27,7 +27,7 @@
               </label>
               {{if .ResourceURLs}}
               <div class="task-resources">
-                {{range .ResourceURLs}}<a href="{{.}}" target="_blank" class="resource-link">📎</a>{{end}}
+                {{range resourceURLs .ResourceURLs}}<a href="{{.}}" target="_blank" class="resource-link">📎</a>{{end}}
               </div>
               {{end}}
               {{if .HasSubmission}}<span class="submission-dot has" title="已提交笔记"></span>{{end}}
