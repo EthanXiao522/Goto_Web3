@@ -512,6 +512,29 @@ textarea.form-input {
   font-size: 0.85rem;
 }
 
+/* --- Form Validation --- */
+.form-input.input-valid {
+  border-color: var(--success);
+  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.15);
+}
+.form-input.input-invalid {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.15);
+}
+.validation-msg {
+  font-size: 0.8rem;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.validation-msg.valid { color: var(--success); }
+.validation-msg.invalid { color: var(--danger); }
+.validation-icon {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
 /* --- Stats Grid --- */
 .stats-grid {
   display: grid;

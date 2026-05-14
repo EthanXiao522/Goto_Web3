@@ -113,6 +113,7 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 	{
 		api.POST("/auth/register", authHandler.Register)
 		api.POST("/auth/login", authHandler.Login)
+		api.GET("/auth/check-username", authHandler.CheckUsername)
 
 		protected := api.Group("")
 		protected.Use(middleware.Auth(jwtSecret))

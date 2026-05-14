@@ -14,28 +14,173 @@
   <div class="auth-card animate-fade-in">
     <div class="auth-logo">WEB3 INFRA</div>
     <div class="auth-subtitle">注册开始你的学习之旅</div>
-    <form id="registerForm">
+    <form id="registerForm" novalidate>
       <div class="form-group">
         <label class="form-label" for="username">用户名</label>
-        <input type="text" id="username" class="form-input" placeholder="你的用户名" required minlength="2">
+        <input type="text" id="username" class="form-input" placeholder="2-64个字符" autocomplete="username" minlength="2" maxlength="64">
+        <div class="validation-msg" id="usernameMsg"></div>
       </div>
       <div class="form-group">
         <label class="form-label" for="email">邮箱</label>
-        <input type="email" id="email" class="form-input" placeholder="your@email.com" required>
+        <input type="text" id="email" class="form-input" placeholder="your@email.com" autocomplete="email">
+        <div class="validation-msg" id="emailMsg"></div>
       </div>
       <div class="form-group">
         <label class="form-label" for="password">密码</label>
-        <input type="password" id="password" class="form-input" placeholder="至少6位" required minlength="6">
+        <input type="password" id="password" class="form-input" placeholder="至少6位" autocomplete="new-password" minlength="6">
+        <div class="validation-msg" id="passwordMsg"></div>
       </div>
-      <div id="regError" style="color:var(--danger);font-size:0.85rem;margin-top:4px;display:none"></div>
-      <button type="submit" class="btn btn-primary w-full" style="margin-top:8px">注册</button>
+      <div id="regError" style="color:var(--danger);font-size:0.85rem;margin-top:8px;display:none"></div>
+      <button type="submit" id="submitBtn" class="btn btn-primary w-full" style="margin-top:8px" disabled>注册</button>
     </form>
     <div class="auth-footer">已有账号？<a href="/login">立即登录</a></div>
   </div>
 </div>
 </div>
 <script>
-(function(){var c=document.getElementById('particles-canvas');if(!c)return;var ctx=c.getContext('2d');var p=[];function rs(){c.width=window.innerWidth;c.height=window.innerHeight;}window.addEventListener('resize',rs);rs();for(var i=0;i<60;i++){p.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,radius:Math.random()*1.5+0.5,alpha:Math.random()*0.3+0.1});}function an(){ctx.clearRect(0,0,c.width,c.height);p.forEach(function(pp){pp.x+=pp.vx;pp.y+=pp.vy;if(pp.x<0)pp.x=c.width;if(pp.x>c.width)pp.x=0;if(pp.y<0)pp.y=c.height;if(pp.y>c.height)pp.y=0;ctx.beginPath();ctx.arc(pp.x,pp.y,pp.radius,0,Math.PI*2);ctx.fillStyle='rgba(0,240,255,'+pp.alpha+')';ctx.fill();});requestAnimationFrame(an);}an();document.getElementById('registerForm').addEventListener('submit',async function(e){e.preventDefault();var un=document.getElementById('username').value;var em=document.getElementById('email').value;var pw=document.getElementById('password').value;var er=document.getElementById('regError');try{var r=await fetch('/api/v1/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:un,email:em,password:pw})});var d=await r.json();if(d.code===201){window.location.href='/login';}else{er.textContent=d.msg||'注册失败';er.style.display='block';}}catch(ex){er.textContent='网络错误，请重试';er.style.display='block';}});})();
+(function() {
+  // --- Particle Background ---
+  var c = document.getElementById('particles-canvas');
+  if (c) {
+    var ctx = c.getContext('2d'), p = [];
+    function rs() { c.width = window.innerWidth; c.height = window.innerHeight; }
+    window.addEventListener('resize', rs); rs();
+    for (var i = 0; i < 60; i++) {
+      p.push({ x: Math.random()*c.width, y: Math.random()*c.height, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3, radius: Math.random()*1.5+0.5, alpha: Math.random()*0.3+0.1 });
+    }
+    function an() {
+      ctx.clearRect(0, 0, c.width, c.height);
+      p.forEach(function(pp) {
+        pp.x += pp.vx; pp.y += pp.vy;
+        if (pp.x < 0) pp.x = c.width; if (pp.x > c.width) pp.x = 0;
+        if (pp.y < 0) pp.y = c.height; if (pp.y > c.height) pp.y = 0;
+        ctx.beginPath(); ctx.arc(pp.x, pp.y, pp.radius, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(0,240,255,' + pp.alpha + ')'; ctx.fill();
+      });
+      requestAnimationFrame(an);
+    }
+    an();
+  }
+
+  // --- Validation State ---
+  var valid = { username: false, email: false, password: false };
+
+  function setValid(field, ok, msg) {
+    valid[field] = ok;
+    var inp = document.getElementById(field);
+    var msgEl = document.getElementById(field + 'Msg');
+    inp.classList.remove('input-valid', 'input-invalid');
+    inp.classList.add(ok ? 'input-valid' : 'input-invalid');
+    msgEl.className = 'validation-msg ' + (ok ? 'valid' : 'invalid');
+    msgEl.innerHTML = ok
+      ? '<span class="validation-icon">✓</span> ' + msg
+      : '<span class="validation-icon">✗</span> ' + msg;
+    updateSubmit();
+  }
+
+  function setNeutral(field) {
+    var inp = document.getElementById(field);
+    var msgEl = document.getElementById(field + 'Msg');
+    inp.classList.remove('input-valid', 'input-invalid');
+    msgEl.className = 'validation-msg';
+    msgEl.innerHTML = '';
+    updateSubmit();
+  }
+
+  function updateSubmit() {
+    var btn = document.getElementById('submitBtn');
+    btn.disabled = !(valid.username && valid.email && valid.password);
+    btn.textContent = (valid.username && valid.email && valid.password) ? '注册' : '请完善表单信息';
+  }
+
+  // --- 1. Username: async check on input (debounce 500ms) ---
+  var usernameTimer;
+  document.getElementById('username').addEventListener('input', function() {
+    var val = this.value.trim();
+    clearTimeout(usernameTimer);
+    if (val.length < 2) {
+      if (val.length === 0) setNeutral('username');
+      else setValid('username', false, '用户名至少2个字符');
+      return;
+    }
+    setValid('username', false, '检测中...');
+    usernameTimer = setTimeout(async function() {
+      try {
+        var r = await fetch('/api/v1/auth/check-username?username=' + encodeURIComponent(val));
+        var d = await r.json();
+        if (d.data.available) {
+          setValid('username', true, '用户名可用');
+        } else {
+          setValid('username', false, d.data.reason || '用户名不可用');
+        }
+      } catch(e) {
+        setValid('username', false, '网络错误，请重试');
+      }
+    }, 500);
+  });
+
+  // --- 2. Email: format validation on blur ---
+  var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  document.getElementById('email').addEventListener('blur', function() {
+    var val = this.value.trim();
+    if (val.length === 0) { setNeutral('email'); return; }
+    if (emailRe.test(val)) {
+      setValid('email', true, '邮箱格式正确');
+    } else {
+      setValid('email', false, '邮箱格式不正确');
+    }
+  });
+  document.getElementById('email').addEventListener('input', function() {
+    if (this.value.trim().length === 0) setNeutral('email');
+  });
+
+  // --- 3. Password: length check on input ---
+  document.getElementById('password').addEventListener('input', function() {
+    var val = this.value;
+    if (val.length === 0) { setNeutral('password'); return; }
+    if (val.length >= 6) {
+      setValid('password', true, '密码长度符合要求');
+    } else {
+      setValid('password', false, '密码至少6位，当前' + val.length + '位');
+    }
+  });
+
+  // --- Form Submit ---
+  document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!(valid.username && valid.email && valid.password)) return;
+    var er = document.getElementById('regError');
+    er.style.display = 'none';
+    var btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '注册中...';
+    try {
+      var r = await fetch('/api/v1/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('username').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          password: document.getElementById('password').value
+        })
+      });
+      var d = await r.json();
+      if (d.code === 201) {
+        window.location.href = '/login?registered=1';
+      } else {
+        er.textContent = d.msg || '注册失败';
+        er.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = '注册';
+      }
+    } catch(ex) {
+      er.textContent = '网络错误，请重试';
+      er.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '注册';
+    }
+  });
+})();
 </script>
 </body>
 </html>

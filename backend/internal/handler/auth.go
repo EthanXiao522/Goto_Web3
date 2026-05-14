@@ -78,3 +78,17 @@ func (h *AuthHandler) Me(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "ok", "data": gin.H{"user": user}})
 }
+
+func (h *AuthHandler) CheckUsername(c *gin.Context) {
+	username := c.Query("username")
+	if username == "" || len(username) < 2 {
+		c.JSON(http.StatusOK, gin.H{"code": 200, "data": gin.H{"available": false, "reason": "用户名至少2个字符"}})
+		return
+	}
+	_, err := h.userRepo.FindByUsername(username)
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{"code": 200, "data": gin.H{"available": false, "reason": "用户名已被占用"}})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 200, "data": gin.H{"available": true}})
+}
