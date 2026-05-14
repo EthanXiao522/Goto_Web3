@@ -1,19 +1,35 @@
 package router
 
 import (
+	"database/sql"
+
 	"github.com/gin-gonic/gin"
+
+	"github.com/xyd/web3-learning-tracker/internal/handler"
 	"github.com/xyd/web3-learning-tracker/internal/middleware"
+	"github.com/xyd/web3-learning-tracker/internal/repository"
+	"github.com/xyd/web3-learning-tracker/internal/service"
 )
 
-func Setup(jwtSecret string) *gin.Engine {
+func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 	r := gin.Default()
 	r.Use(middleware.CORS())
 	r.Use(middleware.Logger())
 
+	userRepo := &repository.UserRepo{DB: db}
+	authService := service.NewAuthService(userRepo, jwtSecret)
+	authHandler := handler.NewAuthHandler(authService, userRepo)
+
 	api := r.Group("/api/v1")
-	api.Use(middleware.Auth(jwtSecret))
 	{
-		_ = api
+		api.POST("/auth/register", authHandler.Register)
+		api.POST("/auth/login", authHandler.Login)
+
+		protected := api.Group("")
+		protected.Use(middleware.Auth(jwtSecret))
+		{
+			protected.GET("/auth/me", authHandler.Me)
+		}
 	}
 
 	return r

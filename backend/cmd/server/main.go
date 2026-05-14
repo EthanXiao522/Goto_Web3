@@ -23,7 +23,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	r := router.Setup(cfg.JWTSecret)
+	r := router.Setup(database.DB, cfg.JWTSecret)
 	slog.Info("server starting", "port", cfg.Port)
 	if err := r.Run(":" + cfg.Port); err != nil {
 		slog.Error("server failed", "error", err)
