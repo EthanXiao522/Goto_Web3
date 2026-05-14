@@ -17,8 +17,13 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 	r.Use(middleware.Logger())
 
 	userRepo := &repository.UserRepo{DB: db}
+	phaseRepo := &repository.PhaseRepo{DB: db}
+	weekRepo := &repository.WeekRepo{DB: db}
+	dayRepo := &repository.DayRepo{DB: db}
+
 	authService := service.NewAuthService(userRepo, jwtSecret)
 	authHandler := handler.NewAuthHandler(authService, userRepo)
+	phaseHandler := handler.NewPhaseHandler(phaseRepo, weekRepo, dayRepo)
 
 	api := r.Group("/api/v1")
 	{
@@ -29,6 +34,9 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 		protected.Use(middleware.Auth(jwtSecret))
 		{
 			protected.GET("/auth/me", authHandler.Me)
+			protected.GET("/phases", phaseHandler.GetPhases)
+			protected.GET("/phases/:id", phaseHandler.GetPhaseDetail)
+			protected.GET("/weeks/:id", phaseHandler.GetWeekDetail)
 		}
 	}
 
