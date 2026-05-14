@@ -65,3 +65,14 @@ func (r *UserRepo) FindByUsername(username string) (*model.User, error) {
 	}
 	return u, nil
 }
+
+func (r *UserRepo) Update(user *model.User) error {
+	_, err := r.DB.Exec(
+		`UPDATE users SET username = ?, email = ?, password_hash = ? WHERE id = ?`,
+		user.Username, user.Email, user.PasswordHash, user.ID,
+	)
+	if err != nil {
+		return fmt.Errorf("user update: %w", err)
+	}
+	return nil
+}

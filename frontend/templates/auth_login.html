@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+{{template "topnav" .}}
 <div class="grid-bg"></div>
 <div class="auth-container">
 <canvas id="particles-canvas"></canvas>
@@ -24,7 +25,7 @@
         <label class="form-label" for="password">密码</label>
         <input type="password" id="password" class="form-input" placeholder="········" required>
       </div>
-      <div id="loginError" style="color:var(--danger);font-size:0.85rem;margin-top:4px;display:none"></div>
+      <div id="loginError" style="background:rgba(255,71,87,0.12);border:1px solid rgba(255,71,87,0.4);color:var(--danger);font-size:0.9rem;font-weight:600;padding:10px 14px;border-radius:6px;margin-top:12px;display:none;text-align:center"></div>
       <button type="submit" class="btn btn-primary w-full" style="margin-top:8px">登录</button>
     </form>
     <div class="auth-footer">还没有账号？<a href="/register">立即注册</a></div>

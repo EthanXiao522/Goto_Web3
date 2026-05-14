@@ -131,6 +131,7 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 		protected.Use(middleware.Auth(jwtSecret))
 		{
 			protected.GET("/auth/me", authHandler.Me)
+				protected.PUT("/auth/profile", authHandler.UpdateProfile)
 			protected.GET("/phases", phaseHandler.GetPhases)
 			protected.GET("/phases/:id", phaseHandler.GetPhaseDetail)
 			protected.GET("/weeks/:id", phaseHandler.GetWeekDetail)
@@ -153,6 +154,7 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 		authPages.GET("/tasks/:id", pageHandler.TaskDetail)
 		authPages.GET("/gantt", pageHandler.Gantt)
 		authPages.GET("/handbook", pageHandler.Handbook)
+			authPages.GET("/profile", pageHandler.ProfilePage)
 	}
 
 	return r

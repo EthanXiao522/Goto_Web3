@@ -35,15 +35,15 @@ func NewPageHandler(
 }
 
 func (h *PageHandler) Landing(c *gin.Context) {
-	c.HTML(http.StatusOK, "landing.html", nil)
+	c.HTML(http.StatusOK, "landing.html", gin.H{})
 }
 
 func (h *PageHandler) LoginPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "auth_login.html", nil)
+	c.HTML(http.StatusOK, "auth_login.html", gin.H{})
 }
 
 func (h *PageHandler) RegisterPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "auth_register.html", nil)
+	c.HTML(http.StatusOK, "auth_register.html", gin.H{})
 }
 
 func (h *PageHandler) Dashboard(c *gin.Context) {
@@ -248,6 +248,10 @@ func (h *PageHandler) Demo(c *gin.Context) {
 		"Phases":  phases,
 		"MockData": mockDashboardData(),
 	})
+}
+
+func (h *PageHandler) ProfilePage(c *gin.Context) {
+	c.HTML(http.StatusOK, "profile.html", h.baseData(c, "修改个人信息", "profile", nil))
 }
 
 func mockDashboardData() gin.H {

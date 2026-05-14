@@ -10,12 +10,19 @@ import (
 
 func Auth(jwtSecret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		tokenStr := ""
 		header := c.GetHeader("Authorization")
-		if header == "" || !strings.HasPrefix(header, "Bearer ") {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "missing token"})
-			return
+		if header != "" && strings.HasPrefix(header, "Bearer ") {
+			tokenStr = strings.TrimPrefix(header, "Bearer ")
 		}
-		tokenStr := strings.TrimPrefix(header, "Bearer ")
+		if tokenStr == "" {
+			var err error
+			tokenStr, err = c.Cookie("token")
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"code": 401, "msg": "missing token"})
+				return
+			}
+		}
 		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
 			return []byte(jwtSecret), nil
 		})

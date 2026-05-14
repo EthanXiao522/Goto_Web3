@@ -1,0 +1,64 @@
+{{define "topnav"}}
+<nav class="topnav" id="topnav">
+  <div class="topnav-inner">
+    <a href="/" class="topnav-home" title="返回首页">
+      <span class="topnav-home-icon">&#8962;</span> 首页
+    </a>
+    <div class="topnav-right">
+      {{if .User}}
+        <div class="topnav-user-dropdown">
+          <span class="topnav-user-trigger">
+            <span class="topnav-username">{{.User.Username}}</span>
+            <span class="topnav-email">{{.User.Email}}</span>
+            <span class="topnav-arrow">▼</span>
+          </span>
+          <div class="topnav-dropdown-menu">
+            <a href="/profile" class="topnav-dropdown-item">修改信息</a>
+            <a href="/logout" class="topnav-dropdown-item" style="color:var(--danger)">退出登录</a>
+          </div>
+        </div>
+      {{else}}
+        <div class="topnav-user-dropdown" id="topnav-guest-dropdown" style="display:none">
+          <span class="topnav-user-trigger" id="topnav-guest-trigger">
+            <span class="topnav-username" id="topnav-uname"></span>
+            <span class="topnav-email" id="topnav-uemail"></span>
+            <span class="topnav-arrow">▼</span>
+          </span>
+          <div class="topnav-dropdown-menu">
+            <a href="/profile" class="topnav-dropdown-item">修改信息</a>
+            <a href="#" class="topnav-dropdown-item" style="color:var(--danger)" onclick="doLogout()">退出登录</a>
+          </div>
+        </div>
+        <a href="/login" class="topnav-link" id="topnav-login">登录</a>
+        <a href="/register" class="topnav-link" id="topnav-register">注册</a>
+      {{end}}
+    </div>
+  </div>
+</nav>
+<script>
+(function(){
+  {{if not .User}}
+  var u = null;
+  try { u = JSON.parse(localStorage.getItem('user')); } catch(e) {}
+  var t = localStorage.getItem('token');
+  if (u && t) {
+    var uname = document.getElementById('topnav-uname');
+    var uemail = document.getElementById('topnav-uemail');
+    var login = document.getElementById('topnav-login');
+    var reg = document.getElementById('topnav-register');
+    var dd = document.getElementById('topnav-guest-dropdown');
+    if (uname) uname.textContent = u.username || '';
+    if (uemail) uemail.textContent = u.email || '';
+    if (login) login.style.display = 'none';
+    if (reg) reg.style.display = 'none';
+    if (dd) dd.style.display = '';
+  }
+  {{end}}
+})();
+function doLogout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  window.location.href = '/';
+}
+</script>
+{{end}}

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/xyd/web3-learning-tracker/internal/repository"
 	"github.com/xyd/web3-learning-tracker/internal/service"
@@ -66,6 +67,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": err.Error()})
 		return
 	}
+	c.SetCookie("token", token, 72*3600, "/", "", false, true)
 	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "ok", "data": gin.H{"token": token, "user": user}})
 }
 
@@ -91,4 +93,64 @@ func (h *AuthHandler) CheckUsername(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 200, "data": gin.H{"available": true}})
+}
+
+type updateProfileReq struct {
+	Username    string `json:"username"`
+	Email       string `json:"email"`
+	NewPassword string `json:"new_password"`
+	OldPassword string `json:"old_password"`
+}
+
+func (h *AuthHandler) UpdateProfile(c *gin.Context) {
+	userID := c.GetUint64("user_id")
+	var req updateProfileReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "invalid input"})
+		return
+	}
+
+	user, err := h.userRepo.FindByID(userID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"code": 404, "msg": "user not found"})
+		return
+	}
+
+	if req.Username != "" && req.Username != user.Username {
+		if _, err := h.userRepo.FindByUsername(req.Username); err == nil {
+			c.JSON(http.StatusConflict, gin.H{"code": 409, "msg": "用户名已被占用"})
+			return
+		}
+		user.Username = req.Username
+	}
+	if req.Email != "" && req.Email != user.Email {
+		if _, err := h.userRepo.FindByEmail(req.Email); err == nil {
+			c.JSON(http.StatusConflict, gin.H{"code": 409, "msg": "邮箱已被注册"})
+			return
+		}
+		user.Email = req.Email
+	}
+	if req.NewPassword != "" {
+		if req.OldPassword == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "修改密码需要提供旧密码"})
+			return
+		}
+		if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.OldPassword)); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "msg": "旧密码错误"})
+			return
+		}
+		hash, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "加密失败"})
+			return
+		}
+		user.PasswordHash = string(hash)
+	}
+
+	if err := h.userRepo.Update(user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "ok", "data": gin.H{"user": user}})
 }
