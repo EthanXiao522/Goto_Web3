@@ -20,10 +20,15 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 	phaseRepo := &repository.PhaseRepo{DB: db}
 	weekRepo := &repository.WeekRepo{DB: db}
 	dayRepo := &repository.DayRepo{DB: db}
+	taskRepo := &repository.TaskRepo{DB: db}
+	userTaskRepo := &repository.UserTaskRepo{DB: db}
 
 	authService := service.NewAuthService(userRepo, jwtSecret)
+	taskService := service.NewTaskService(taskRepo, userTaskRepo)
+
 	authHandler := handler.NewAuthHandler(authService, userRepo)
 	phaseHandler := handler.NewPhaseHandler(phaseRepo, weekRepo, dayRepo)
+	taskHandler := handler.NewTaskHandler(taskService, taskRepo, userTaskRepo)
 
 	api := r.Group("/api/v1")
 	{
@@ -37,6 +42,9 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 			protected.GET("/phases", phaseHandler.GetPhases)
 			protected.GET("/phases/:id", phaseHandler.GetPhaseDetail)
 			protected.GET("/weeks/:id", phaseHandler.GetWeekDetail)
+			protected.GET("/tasks/:id", taskHandler.GetTaskDetail)
+			protected.PATCH("/tasks/:id/complete", taskHandler.ToggleComplete)
+			protected.PUT("/tasks/:id/submissions", taskHandler.UpdateSubmissions)
 		}
 	}
 
