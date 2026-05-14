@@ -208,26 +208,21 @@ func (h *PageHandler) Gantt(c *gin.Context) {
 	userID := c.GetUint64("user_id")
 	phases, _ := h.phaseRepo.GetAllWithProgress(userID)
 
-	type weekInfo struct {
-		WeekNumber int    `json:"week_number"`
-		Title      string `json:"title"`
-	}
-	type phaseGantt struct {
-		model.Phase
-		Weeks []weekInfo `json:"weeks"`
-	}
-
 	var enriched []gin.H
 	for _, p := range phases {
-		weeks, _ := h.weekRepo.FindByPhase(p.ID)
+		weeks, _ := h.weekRepo.FindByPhaseWithProgress(p.ID, userID)
 		var wi []gin.H
 		for _, w := range weeks {
-			wi = append(wi, gin.H{"WeekNumber": w.WeekNumber, "Title": w.Title})
+			wi = append(wi, gin.H{
+				"WeekNumber": w.WeekNumber, "Title": w.Title,
+				"TaskCount": w.TaskCount, "CompletedCount": w.CompletedCount,
+			})
 		}
 		p.WeekCount = len(weeks)
 		enriched = append(enriched, gin.H{
 			"ID": p.ID, "PhaseNumber": p.PhaseNumber, "Title": p.Title,
 			"SortOrder": p.SortOrder, "WeekCount": len(weeks), "Weeks": wi,
+			"TaskCount": p.TaskCount, "CompletedCount": p.CompletedCount,
 		})
 	}
 

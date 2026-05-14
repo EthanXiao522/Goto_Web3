@@ -4,25 +4,35 @@
   <h1 class="page-title">第{{.Week.WeekNumber}}周 · {{.Week.Title}}</h1>
   {{if .Week.Goal}}<p class="week-goal">{{.Week.Goal}}</p>{{end}}
   {{range .Days}}
-  <div class="day-section">
-    <h3 class="day-heading">Day {{.DayNumber}} · {{.Title}} <span class="day-progress">{{.CompletedCount}}/{{.TaskCount}}</span></h3>
-    <div class="task-list">
-      {{range .Tasks}}
-      <div class="task-item {{if .IsCheckpoint}}checkpoint{{end}}">
-        <label class="task-checkbox-label">
-          <input type="checkbox" class="task-checkbox" data-task-id="{{.ID}}" {{if .UserCompleted}}checked{{end}} onchange="toggleTaskCb(this)">
-          <span class="checkmark"></span>
-          <span class="task-content">{{.Content}}</span>
-        </label>
-        {{if .ResourceURLs}}<div class="task-resources">{{range resourceURLs .ResourceURLs}}<a href="{{.}}" target="_blank" class="resource-link">📎</a>{{end}}</div>{{end}}
-        <a href="/tasks/{{.ID}}" class="task-detail-link">详情 →</a>
-      </div>
+  <div class="day-group">
+    <h4 class="day-title">Day {{.DayNumber}} · {{.Title}} <span class="day-progress">{{.CompletedCount}}/{{.TaskCount}}</span></h4>
+    {{range .Tasks}}
+    <div class="task-item {{if .IsCheckpoint}}checkpoint{{end}}">
+      <span class="task-content">{{.Content}}</span>
+      {{if .ResourceURLs}}
+      <span class="task-resources" style="display:inline-flex;gap:4px;flex-shrink:0">
+        {{range resourceURLs .ResourceURLs}}<a href="{{.}}" target="_blank" class="resource-link">📎</a>{{end}}
+      </span>
       {{end}}
+      <div class="task-actions">
+        <a href="/tasks/{{.ID}}" class="btn-task">详情</a>
+        <button class="btn-task btn-complete{{if .UserCompleted}} is-done{{end}}" data-task-id="{{.ID}}" onclick="toggleCompleteBtn(this)">{{if .UserCompleted}}已取消{{else}}标记完成{{end}}</button>
+      </div>
     </div>
+    {{end}}
   </div>
   {{end}}
 </div>
 <script>
-async function toggleTaskCb(cb){var id=cb.dataset.taskId,completed=cb.checked;try{var t=localStorage.getItem('token'),r=await fetch('/api/v1/tasks/'+id+'/complete',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify({completed:completed})}),d=await r.json();if(d.code!==200){cb.checked=!completed;showToast(d.msg||'error','error');}else{showToast(completed?'完成 ✓':'已取消','success');}}catch(e){cb.checked=!completed;showToast('网络错误','error');}}
+async function toggleCompleteBtn(btn){
+  var id=btn.dataset.taskId, wasDone=btn.classList.contains('is-done'), completed=!wasDone;
+  btn.textContent='...'; btn.disabled=true;
+  try{
+    var t=localStorage.getItem('token'), r=await fetch('/api/v1/tasks/'+id+'/complete',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t},body:JSON.stringify({completed:completed})}), d=await r.json();
+    if(d.code===200){if(completed){btn.classList.add('is-done');btn.textContent='已取消';}else{btn.classList.remove('is-done');btn.textContent='标记完成';}showToast(completed?'已完成':'已取消','success');}
+    else{btn.textContent=wasDone?'已取消':'标记完成';showToast(d.msg||'error','error');}
+  }catch(e){btn.textContent=wasDone?'已取消':'标记完成';showToast('网络错误','error');}
+  btn.disabled=false;
+}
 </script>
 {{template "app-layout-end" .}}

@@ -1,34 +1,35 @@
 {{template "app-layout" .}}
 <div class="gantt-page">
   <h1 class="page-title">甘特图</h1>
-  <div class="gantt-controls">
-    <button class="btn btn-outline btn-sm active" onclick="switchGanttView('week',this)">周视图</button>
-    <button class="btn btn-outline btn-sm" onclick="switchGanttView('day',this)">日视图</button>
-  </div>
-  <div class="gantt-chart" id="ganttChart">
-    <div class="gantt-header">
-      <div class="gantt-label-col">Phase / Week</div>
-      <div class="gantt-timeline-col" id="ganttTimeline"></div>
+
+  <div class="landing-gantt-v2">
+    <div class="gantt-v2-header">
+      <div class="gantt-v2-label"></div>
+      <div class="gantt-v2-weeks">
+        <span>W1</span><span>W2</span><span>W3</span><span>W4</span>
+        <span>W5</span><span>W6</span><span>W7</span><span>W8</span>
+        <span>W9</span><span>W10</span><span>W11</span><span>W12</span>
+      </div>
     </div>
     {{range .Phases}}
-    <div class="gantt-row phase-row">
-      <div class="gantt-label"><span class="phase-badge phase-badge-{{.PhaseNumber}}">P{{.PhaseNumber}}</span> {{.Title}}</div>
-      <div class="gantt-bar-container">
-        <div class="gantt-bar phase-bar phase-bar-{{.PhaseNumber}}" style="left:{{ganttLeft .PhaseNumber}}%;width:{{ganttWidth .WeekCount}}%">{{.Title}}</div>
+    <div class="gantt-v2-row">
+      <div class="gantt-v2-label"><span class="phase-dot phase-dot-{{phaseColorClass .PhaseNumber}}"></span>Phase {{.PhaseNumber}}</div>
+      <div class="gantt-v2-bar-area">
+        <div class="gantt-v2-bar gantt-v2-{{phaseColorClass .PhaseNumber}}" style="left:{{ganttLeft .PhaseNumber}}%;width:{{ganttWidth .WeekCount}}%">{{.Title}}</div>
       </div>
     </div>
     {{range .Weeks}}
-    <div class="gantt-row week-row">
-      <div class="gantt-label gantt-label-indent">第{{.WeekNumber}}周</div>
-      <div class="gantt-bar-container">
-        <div class="gantt-bar week-bar" style="left:{{ganttWeekLeft .WeekNumber}}%;width:8.33%">{{.Title}}</div>
+    <div class="gantt-v2-row">
+      <div class="gantt-v2-label gantt-v2-label-week">W{{.WeekNumber}}</div>
+      <div class="gantt-v2-bar-area gantt-v2-week-area">
+        <div class="gantt-week-bar" style="left:{{ganttWeekLeft .WeekNumber}}%;width:8.33%">
+          <div class="gantt-week-bar-fill" style="width:{{if .TaskCount}}{{percent .CompletedCount .TaskCount}}{{else}}0{{end}}%"></div>
+          <span class="gantt-week-bar-text">{{if .TaskCount}}{{.CompletedCount}}/{{.TaskCount}}{{end}}</span>
+        </div>
       </div>
     </div>
     {{end}}
     {{end}}
   </div>
 </div>
-<script>
-function switchGanttView(view,btn){document.querySelectorAll('.gantt-controls .btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('ganttChart').dataset.view=view;}
-</script>
 {{template "app-layout-end" .}}

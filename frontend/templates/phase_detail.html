@@ -5,9 +5,9 @@
   <div class="accordion">
     {{range $wi, $week := .Weeks}}
     <div class="accordion-item{{if eq $wi 0}} open{{end}}">
-      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open');var a=this.querySelector('.accordion-arrow');if(a)a.textContent=this.parentElement.classList.contains('open')?'▼':'▶'">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
         <div class="accordion-header-left">
-          <span class="accordion-arrow">▼</span>
+          <span class="accordion-arrow">▶</span>
           <span class="accordion-title">第{{$week.WeekNumber}}周 · {{$week.Title}}</span>
         </div>
         <span class="accordion-badge">{{$week.CompletedCount}}/{{$week.TaskCount}}</span>
@@ -17,24 +17,23 @@
         {{range $week.Days}}
         <div class="day-group">
           <h4 class="day-title">Day {{.DayNumber}} · {{.Title}} <span class="day-progress">{{.CompletedCount}}/{{.TaskCount}}</span></h4>
-          <div class="task-list">
-            {{range .Tasks}}
-            <div class="task-item {{if .IsCheckpoint}}checkpoint{{end}}">
-              <label class="task-checkbox-label">
-                <input type="checkbox" class="task-checkbox" data-task-id="{{.ID}}" {{if .UserCompleted}}checked{{end}} onchange="toggleTaskCb(this)">
-                <span class="checkmark"></span>
-                <span class="task-content">{{.Content}}</span>
-              </label>
-              {{if .ResourceURLs}}
-              <div class="task-resources">
-                {{range resourceURLs .ResourceURLs}}<a href="{{.}}" target="_blank" class="resource-link">📎</a>{{end}}
-              </div>
-              {{end}}
-              {{if .HasSubmission}}<span class="submission-dot has" title="已提交笔记"></span>{{end}}
-              <a href="/tasks/{{.ID}}" class="task-detail-link">详情 →</a>
-            </div>
+          {{range .Tasks}}
+          <div class="task-item {{if .IsCheckpoint}}checkpoint{{end}}">
+            <span class="task-content">{{.Content}}</span>
+            {{if .ResourceURLs}}
+            <span class="task-resources" style="display:inline-flex;gap:4px;flex-shrink:0">
+              {{range resourceURLs .ResourceURLs}}<a href="{{.}}" target="_blank" class="resource-link">📎</a>{{end}}
+            </span>
             {{end}}
+            {{if .HasSubmission}}<span class="submission-dot has" title="已提交笔记"></span>{{end}}
+            <div class="task-actions">
+              <a href="/tasks/{{.ID}}" class="btn-task">详情</a>
+              <button class="btn-task btn-complete{{if .UserCompleted}} is-done{{end}}" data-task-id="{{.ID}}" onclick="toggleCompleteBtn(this)">
+                {{if .UserCompleted}}已取消{{else}}标记完成{{end}}
+              </button>
+            </div>
           </div>
+          {{end}}
         </div>
         {{end}}
       </div>
@@ -43,6 +42,25 @@
   </div>
 </div>
 <script>
-async function toggleTaskCb(cb){var id=cb.dataset.taskId,completed=cb.checked;try{var t=localStorage.getItem('token'),r=await fetch('/api/v1/tasks/'+id+'/complete',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify({completed:completed})}),d=await r.json();if(d.code!==200){cb.checked=!completed;showToast(d.msg||'error','error');}else{showToast(completed?'完成 ✓':'已取消','success');}}catch(e){cb.checked=!completed;showToast('网络错误','error');}}
+async function toggleCompleteBtn(btn){
+  var id=btn.dataset.taskId;
+  var wasDone=btn.classList.contains('is-done');
+  var completed=!wasDone;
+  btn.textContent='...'; btn.disabled=true;
+  try{
+    var t=localStorage.getItem('token');
+    var r=await fetch('/api/v1/tasks/'+id+'/complete',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t},body:JSON.stringify({completed:completed})});
+    var d=await r.json();
+    if(d.code===200){
+      if(completed){btn.classList.add('is-done');btn.textContent='已取消';}
+      else{btn.classList.remove('is-done');btn.textContent='标记完成';}
+      showToast(completed?'已完成 ✓':'已取消','success');
+    }else{
+      btn.textContent=wasDone?'已取消':'标记完成';
+      showToast(d.msg||'操作失败','error');
+    }
+  }catch(e){btn.textContent=wasDone?'已取消':'标记完成';showToast('网络错误','error');}
+  btn.disabled=false;
+}
 </script>
 {{template "app-layout-end" .}}

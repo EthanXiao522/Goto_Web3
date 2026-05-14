@@ -221,7 +221,7 @@ body { padding-top: 63px; }
   display: flex;
   flex-direction: column;
   position: fixed;
-  top: 0; left: 0;
+  top: 63px; left: 0;
   bottom: 0;
   z-index: 100;
   transition: transform 0.3s ease;
@@ -262,10 +262,10 @@ body { padding-top: 63px; }
 /* Left edge hover trigger - visible only when sidebar is hidden */
 .sidebar-edge-trigger {
   position: fixed;
-  top: 0;
+  top: 63px;
   left: 0;
   width: 12px;
-  height: 100%;
+  height: calc(100% - 63px);
   z-index: 99;
   cursor: pointer;
   transition: background 0.2s ease;
@@ -1891,6 +1891,42 @@ textarea.form-input {
 .gantt-v2-purple { background: linear-gradient(90deg, rgba(179,71,234,0.65), rgba(179,71,234,0.25)); }
 .gantt-v2-green { background: linear-gradient(90deg, rgba(0,255,136,0.65), rgba(0,255,136,0.25)); }
 
+/* --- Gantt Week Progress Bars --- */
+.gantt-v2-label-week {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  padding-left: 12px;
+}
+.gantt-v2-week-area {
+  height: 28px;
+}
+.gantt-week-bar {
+  position: absolute;
+  top: 2px;
+  height: 24px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gantt-week-bar-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: rgba(0,240,255,0.2);
+  border-radius: 2px 0 0 2px;
+  transition: width 0.5s ease;
+}
+.gantt-week-bar-text {
+  position: relative;
+  z-index: 1;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
 .phase-dot {
   display: inline-block;
   width: 8px;
@@ -1983,3 +2019,143 @@ textarea.form-input {
 .text-xs { font-size: 0.7rem; }
 .w-full { width: 100%; }
 .hidden { display: none; }
+
+/* --- Week Table --- */
+.week-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.week-table th {
+  text-align: left;
+  padding: 8px 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border-color);
+}
+.week-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: middle;
+}
+.wt-week {
+  color: var(--accent-cyan);
+  font-weight: 700;
+  width: 50px;
+}
+.wt-title {
+  color: var(--text-primary);
+  min-width: 180px;
+}
+.wt-bar {
+  width: 40%;
+}
+.wt-bar .progress-bar {
+  height: 8px;
+  background: var(--bg-surface);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.wt-bar .progress-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+.wt-count {
+  color: var(--text-secondary);
+  text-align: right;
+  width: 60px;
+  font-weight: 600;
+}
+
+/* --- Task Item Rework --- */
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: background var(--transition-fast);
+}
+.task-item:hover { background: rgba(0,240,255,0.03); }
+.task-item.checkpoint {
+  border-left: 3px solid #ffc107;
+  background: rgba(255,193,7,0.04);
+}
+.task-content {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+.task-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.btn-task {
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+.btn-task:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+.btn-task.btn-complete {
+  border-color: var(--success);
+  color: var(--success);
+}
+.btn-task.btn-complete:hover {
+  background: rgba(0,255,136,0.1);
+}
+.btn-task.btn-complete.is-done {
+  background: rgba(0,255,136,0.12);
+  color: var(--success);
+  border-color: var(--success);
+}
+
+/* --- Accordion Fix --- */
+.accordion-item .accordion-body { display: none; }
+.accordion-item.open .accordion-body { display: block; }
+.accordion-header {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  margin-bottom: 4px;
+  transition: background var(--transition-fast);
+}
+.accordion-header:hover { background: rgba(0,240,255,0.04); }
+.accordion-arrow {
+  font-size: 0.7rem;
+  transition: transform 0.2s ease;
+  color: var(--accent-cyan);
+}
+.open > .accordion-header .accordion-arrow { transform: rotate(90deg); }
+.accordion-body {
+  padding: 12px 0 20px;
+}
+.day-group {
+  margin-bottom: 20px;
+}
+.day-title {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-color);
+}

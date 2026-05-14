@@ -36,17 +36,20 @@
     {{end}}
   </div>
   <h2 class="section-title">每周进度</h2>
-  <div class="week-progress-list">
+  <table class="week-table">
+    <thead><tr><th>周次</th><th>主题</th><th>进度</th><th>完成</th></tr></thead>
+    <tbody>
     {{range .Data.WeekProgress}}
-    <div class="week-progress-item">
-      <div class="week-progress-header">
-        <span>第{{.WeekNumber}}周 · {{.Title}}</span>
-        <span>{{.CompletedCount}}/{{.TaskCount}}</span>
-      </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:{{if .TaskCount}}{{percent .CompletedCount .TaskCount}}{{else}}0{{end}}%"></div></div>
-    </div>
+    <tr>
+      <td class="wt-week">W{{.WeekNumber}}</td>
+      <td class="wt-title">{{.Title}}</td>
+      <td class="wt-bar">
+        <div class="progress-bar"><div class="progress-fill" style="width:{{if .TaskCount}}{{percent .CompletedCount .TaskCount}}{{else}}0{{end}}%"></div></div>
+      </td>
+      <td class="wt-count">{{.CompletedCount}}/{{.TaskCount}}</td>
+    </tr>
     {{end}}
-  </div>
+  </tbody></table>
   <h2 class="section-title">最近活动</h2>
   <div class="recent-list">
     {{range .Data.RecentTasks}}
