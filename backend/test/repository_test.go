@@ -1,12 +1,19 @@
-package repository
+package test
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/xyd/web3-learning-tracker/internal/config"
 	"github.com/xyd/web3-learning-tracker/internal/database"
 	"github.com/xyd/web3-learning-tracker/internal/model"
+	"github.com/xyd/web3-learning-tracker/internal/repository"
 )
+
+func uniqueName(prefix string) string {
+	return fmt.Sprintf("%s_%d", prefix, time.Now().UnixNano())
+}
 
 func setupRepo(t *testing.T) {
 	t.Helper()
@@ -23,8 +30,8 @@ func TestUserRepo_CreateAndFind(t *testing.T) {
 	setupRepo(t)
 	defer database.Close()
 
-	repo := &UserRepo{DB: database.DB}
-	name := "test_create_find"
+	repo := &repository.UserRepo{DB: database.DB}
+	name := uniqueName("test_create_find")
 	email := name + "@test.com"
 	u := &model.User{Username: name, Email: email, PasswordHash: "hash"}
 	id, err := repo.Create(u)
@@ -49,7 +56,7 @@ func TestUserRepo_CreateAndFind(t *testing.T) {
 	}
 
 	_, err = repo.FindByEmail("nonexist@test.com")
-	if err != ErrNotFound {
+	if err != repository.ErrNotFound {
 		t.Errorf("expected ErrNotFound, got %v", err)
 	}
 }
@@ -58,7 +65,7 @@ func TestPhaseRepo_GetAll(t *testing.T) {
 	setupRepo(t)
 	defer database.Close()
 
-	repo := &PhaseRepo{DB: database.DB}
+	repo := &repository.PhaseRepo{DB: database.DB}
 	phases, err := repo.GetAllWithProgress(1)
 	if err != nil {
 		t.Fatalf("get all: %v", err)
@@ -77,7 +84,7 @@ func TestPhaseRepo_FindByID(t *testing.T) {
 	setupRepo(t)
 	defer database.Close()
 
-	repo := &PhaseRepo{DB: database.DB}
+	repo := &repository.PhaseRepo{DB: database.DB}
 	p, err := repo.FindByID(1)
 	if err != nil {
 		t.Fatalf("find by id: %v", err)
@@ -91,7 +98,7 @@ func TestWeekRepo_FindByPhase(t *testing.T) {
 	setupRepo(t)
 	defer database.Close()
 
-	repo := &WeekRepo{DB: database.DB}
+	repo := &repository.WeekRepo{DB: database.DB}
 	weeks, err := repo.FindByPhase(1)
 	if err != nil {
 		t.Fatalf("find by phase: %v", err)
@@ -105,7 +112,7 @@ func TestDayRepo_FindByWeek(t *testing.T) {
 	setupRepo(t)
 	defer database.Close()
 
-	repo := &DayRepo{DB: database.DB}
+	repo := &repository.DayRepo{DB: database.DB}
 	days, err := repo.FindByWeek(1)
 	if err != nil {
 		t.Fatalf("find by week: %v", err)
@@ -119,7 +126,7 @@ func TestTaskRepo_FindByDay(t *testing.T) {
 	setupRepo(t)
 	defer database.Close()
 
-	repo := &TaskRepo{DB: database.DB}
+	repo := &repository.TaskRepo{DB: database.DB}
 	tasks, err := repo.FindByDay(1)
 	if err != nil {
 		t.Fatalf("find by day: %v", err)
@@ -133,7 +140,7 @@ func TestUserTaskRepo_LazyCreate(t *testing.T) {
 	setupRepo(t)
 	defer database.Close()
 
-	repo := &UserTaskRepo{DB: database.DB}
+	repo := &repository.UserTaskRepo{DB: database.DB}
 	ut, err := repo.LazyCreate(1, 1)
 	if err != nil {
 		t.Fatalf("lazy create: %v", err)
@@ -155,7 +162,7 @@ func TestUserTaskRepo_UpdateComplete(t *testing.T) {
 	setupRepo(t)
 	defer database.Close()
 
-	repo := &UserTaskRepo{DB: database.DB}
+	repo := &repository.UserTaskRepo{DB: database.DB}
 	if err := repo.UpdateComplete(1, 1, true); err != nil {
 		t.Fatalf("update complete: %v", err)
 	}

@@ -1,18 +1,25 @@
-package handler
+package test
 
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/xyd/web3-learning-tracker/internal/config"
 	"github.com/xyd/web3-learning-tracker/internal/database"
+	"github.com/xyd/web3-learning-tracker/internal/handler"
 	"github.com/xyd/web3-learning-tracker/internal/repository"
 	"github.com/xyd/web3-learning-tracker/internal/service"
 )
+
+func uniqueNameH(prefix string) string {
+	return fmt.Sprintf("%s_%d", prefix, time.Now().UnixNano())
+}
 
 func setupHandler(t *testing.T) (*gin.Engine, string) {
 	t.Helper()
@@ -30,7 +37,7 @@ func setupHandler(t *testing.T) (*gin.Engine, string) {
 
 	userRepo := &repository.UserRepo{DB: database.DB}
 	authService := service.NewAuthService(userRepo, cfg.JWTSecret)
-	authHandler := NewAuthHandler(authService, userRepo)
+	authHandler := handler.NewAuthHandler(authService, userRepo)
 
 	r.POST("/api/v1/auth/register", authHandler.Register)
 	r.POST("/api/v1/auth/login", authHandler.Login)
@@ -45,7 +52,8 @@ func setupHandler(t *testing.T) (*gin.Engine, string) {
 func TestAuthHandler_Register(t *testing.T) {
 	r, _ := setupHandler(t)
 
-	body := map[string]string{"username": "handler_reg_test", "email": "handler_reg@test.com", "password": "123456"}
+	uname := uniqueNameH("handler_reg_test")
+	body := map[string]string{"username": uname, "email": uname + "@test.com", "password": "123456"}
 	b, _ := json.Marshal(body)
 	req := httptest.NewRequest("POST", "/api/v1/auth/register", bytes.NewReader(b))
 	req.Header.Set("Content-Type", "application/json")
@@ -66,7 +74,8 @@ func TestAuthHandler_Register(t *testing.T) {
 func TestAuthHandler_RegisterDuplicate(t *testing.T) {
 	r, _ := setupHandler(t)
 
-	body := map[string]string{"username": "handler_dup_test", "email": "handler_dup@test.com", "password": "123456"}
+	uname := uniqueNameH("handler_dup_test")
+	body := map[string]string{"username": uname, "email": uname + "@test.com", "password": "123456"}
 	b, _ := json.Marshal(body)
 	req := httptest.NewRequest("POST", "/api/v1/auth/register", bytes.NewReader(b))
 	req.Header.Set("Content-Type", "application/json")

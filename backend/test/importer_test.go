@@ -1,12 +1,14 @@
-package importer
+package test
 
 import (
 	"os"
 	"testing"
+
+	"github.com/xyd/web3-learning-tracker/internal/importer"
 )
 
 func TestParse_RealFile(t *testing.T) {
-	data, err := Parse("../../../sources/web3_infra_3month_plan.md")
+	data, err := importer.Parse("../../sources/web3_infra_3month_plan.md")
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -75,7 +77,7 @@ func TestParse_Fixture(t *testing.T) {
 	os.WriteFile(tmpFile, []byte(fixture), 0644)
 	defer os.Remove(tmpFile)
 
-	data, err := Parse(tmpFile)
+	data, err := importer.Parse(tmpFile)
 	if err != nil {
 		t.Fatalf("parse fixture: %v", err)
 	}
