@@ -1,8 +1,12 @@
 package handler
 
 import (
+	"log/slog"
 	"net/http"
+	"os"
+	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -288,11 +292,95 @@ func (h *PageHandler) Gantt(c *gin.Context) {
 	c.HTML(http.StatusOK, "gantt.html", h.baseData(c, "甘特图", "gantt", gin.H{"Phases": enriched}))
 }
 
-func (h *PageHandler) Handbook(c *gin.Context) {
-	c.HTML(http.StatusOK, "handbook.html", h.baseData(c, "学习计划书", "handbook", gin.H{
-		"Content": "<p>手册内容将通过 importer 导入后渲染</p>",
-		"TOC":     []gin.H{},
+func (h *PageHandler) LearningTasks(c *gin.Context) {
+	userID := c.GetUint64("user_id")
+	phases, _ := h.phaseRepo.GetAllWithProgress(userID)
+
+	var enrichedPhases []gin.H
+	for _, p := range phases {
+		weeks, _ := h.weekRepo.FindByPhase(p.ID)
+		var enrichedWeeks []gin.H
+		var allTaskIDs []uint64
+		for _, w := range weeks {
+			days, _ := h.dayRepo.FindByWeek(w.ID)
+			var enrichedDays []gin.H
+			for _, d := range days {
+				tasks, _ := h.taskRepo.FindByDay(d.ID)
+				var enrichedTasks []gin.H
+				for _, t := range tasks {
+					allTaskIDs = append(allTaskIDs, t.ID)
+					enrichedTasks = append(enrichedTasks, gin.H{
+						"ID": t.ID, "Content": t.Content, "EstimatedHours": t.EstimatedHours,
+						"ResourceURLs": t.ResourceURLs, "IsCheckpoint": t.IsCheckpoint, "SortOrder": t.SortOrder,
+					})
+				}
+				enrichedDays = append(enrichedDays, gin.H{
+					"ID": d.ID, "DayNumber": d.DayNumber, "Title": d.Title,
+					"Tasks": enrichedTasks,
+				})
+			}
+			enrichedWeeks = append(enrichedWeeks, gin.H{
+				"ID": w.ID, "WeekNumber": w.WeekNumber, "Title": w.Title,
+				"Days": enrichedDays,
+			})
+		}
+
+		utMap, _ := h.userTaskRepo.FindByUserAndTaskIDs(userID, allTaskIDs)
+		// Embed IsCompleted into each task
+		for _, wk := range enrichedWeeks {
+			for _, dy := range wk["Days"].([]gin.H) {
+				for _, tk := range dy["Tasks"].([]gin.H) {
+					taskID := tk["ID"].(uint64)
+					if ut, ok := utMap[taskID]; ok {
+						tk["IsCompleted"] = ut.IsCompleted
+					}
+				}
+			}
+		}
+
+		enrichedPhases = append(enrichedPhases, gin.H{
+			"ID": p.ID, "PhaseNumber": p.PhaseNumber, "Title": p.Title,
+			"TaskCount": p.TaskCount, "CompletedCount": p.CompletedCount,
+			"Weeks": enrichedWeeks, "UserTasks": utMap,
+		})
+	}
+
+	c.HTML(http.StatusOK, "learning_tasks.html", h.baseData(c, "学习任务", "tasks", gin.H{
+		"Phases": enrichedPhases,
 	}))
+}
+
+func (h *PageHandler) Handbook(c *gin.Context) {
+	data, err := os.ReadFile("../sources/web3_infra_3month_plan.md")
+	if err != nil {
+		slog.Error("read handbook md failed", "err", err)
+		c.HTML(http.StatusOK, "handbook.html", h.baseData(c, "学习计划书", "handbook", gin.H{
+			"Content": "<p>手册内容加载失败</p>",
+			"TOC":     []gin.H{},
+		}))
+		return
+	}
+	raw := string(data)
+	toc := extractTOC(raw)
+	c.HTML(http.StatusOK, "handbook.html", h.baseData(c, "学习计划书", "handbook", gin.H{
+		"RawContent": raw,
+		"TOC":        toc,
+	}))
+}
+
+func extractTOC(md string) []gin.H {
+	var toc []gin.H
+	re := regexp.MustCompile(`(?m)^(#{1,4})\s+(.+)$`)
+	matches := re.FindAllStringSubmatch(md, -1)
+	for _, m := range matches {
+		level := len(m[1])
+		title := strings.TrimSpace(m[2])
+		anchor := strings.ToLower(title)
+		anchor = regexp.MustCompile(`[^\w一-鿿]+`).ReplaceAllString(anchor, "-")
+		anchor = strings.Trim(anchor, "-")
+		toc = append(toc, gin.H{"Level": level, "Title": title, "Anchor": anchor})
+	}
+	return toc
 }
 
 func (h *PageHandler) Demo(c *gin.Context) {

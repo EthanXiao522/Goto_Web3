@@ -44,6 +44,14 @@ func (r *TaskRepo) FindByID(id uint64) (*model.Task, error) {
 	return t, nil
 }
 
+func (r *TaskRepo) UpdateContent(id uint64, content string) error {
+	_, err := r.DB.Exec(`UPDATE tasks SET content = ? WHERE id = ?`, content, id)
+	if err != nil {
+		return fmt.Errorf("task update content: %w", err)
+	}
+	return nil
+}
+
 func (r *TaskRepo) FindIDsByDay(dayID uint64) ([]uint64, error) {
 	rows, err := r.DB.Query(`SELECT id FROM tasks WHERE day_id = ? ORDER BY sort_order`, dayID)
 	if err != nil {

@@ -1,0 +1,142 @@
+{{template "app-layout" .}}
+<div class="task-tree-page">
+  <h1 class="page-title">学习任务</h1>
+  <p class="page-subtitle">阶段 → 周 → 天 → 任务，点击展开查看详情。点击「编辑」可修改任务内容，修改会自动同步到计划文档。</p>
+
+  <div class="task-tree">
+    {{range .Phases}}
+    {{$phaseNum := .PhaseNumber}}
+    <div class="tree-phase">
+      <div class="tree-row tree-row-phase" onclick="treeToggle(this)">
+        <span class="tree-arrow">▶</span>
+        <span class="tree-dot phase-dot-{{phaseColorClass .PhaseNumber}}"></span>
+        <span class="tree-label">阶段 {{.PhaseNumber}}：{{.Title}}</span>
+        <span class="tree-badge">{{.CompletedCount}}/{{.TaskCount}}</span>
+      </div>
+      <div class="tree-children">
+        {{range .Weeks}}
+        <div class="tree-week">
+          <div class="tree-row tree-row-week" onclick="treeToggle(this)">
+            <span class="tree-arrow">▶</span>
+            <span class="tree-label">第 {{.WeekNumber}} 周：{{.Title}}</span>
+          </div>
+          <div class="tree-children">
+            {{range .Days}}
+            <div class="tree-day">
+              <div class="tree-row tree-row-day" onclick="treeToggle(this)">
+                <span class="tree-arrow">▶</span>
+                <span class="tree-label">Day {{.DayNumber}}：{{.Title}}</span>
+              </div>
+              <div class="tree-children">
+                {{range .Tasks}}
+                <div class="tree-row tree-row-task{{if .IsCheckpoint}} tree-row-checkpoint{{end}}" data-task-id="{{.ID}}">
+                  <span class="tree-task-status {{if .IsCompleted}}done{{else}}pending{{end}}">{{if .IsCompleted}}✓{{else}}○{{end}}</span>
+                  <span class="tree-task-content">{{.Content}}</span>
+                  {{if .ResourceURLs}}<span class="tree-task-link">🔗</span>{{end}}
+                  <span class="tree-task-hours">{{.EstimatedHours}}h</span>
+                  <button class="tree-task-edit" onclick="taskEdit(event, {{.ID}}, this)" title="编辑任务内容">✎</button>
+                </div>
+                {{end}}
+              </div>
+            </div>
+            {{end}}
+          </div>
+        </div>
+        {{end}}
+      </div>
+    </div>
+    {{end}}
+  </div>
+</div>
+
+<script>
+function treeToggle(el) {
+  var arrow = el.querySelector('.tree-arrow');
+  var children = el.parentElement.querySelector(':scope > .tree-children');
+  if (!children) return;
+  if (children.classList.contains('open')) {
+    children.classList.remove('open');
+    arrow.textContent = '▶';
+  } else {
+    children.classList.add('open');
+    arrow.textContent = '▼';
+  }
+}
+
+function taskEdit(e, taskId, btn) {
+  e.stopPropagation();
+  var row = btn.closest('.tree-row-task');
+  var contentSpan = row.querySelector('.tree-task-content');
+  var oldContent = contentSpan.textContent;
+
+  var input = document.createElement('input');
+  input.type = 'text';
+  input.value = oldContent;
+  input.className = 'tree-task-input';
+
+  var saveBtn = document.createElement('button');
+  saveBtn.textContent = '保存';
+  saveBtn.className = 'tree-task-save';
+  saveBtn.onclick = function(ev) {
+    ev.stopPropagation();
+    var newContent = input.value.trim();
+    if (!newContent || newContent === oldContent) {
+      cancelEdit();
+      return;
+    }
+    saveBtn.disabled = true;
+    saveBtn.textContent = '...';
+    fetch('/api/v1/tasks/' + taskId + '/content', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({content: newContent})
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.code === 200) {
+        contentSpan.textContent = newContent;
+        cancelEdit();
+      } else {
+        alert('保存失败: ' + (d.msg || '未知错误'));
+        saveBtn.disabled = false;
+        saveBtn.textContent = '保存';
+      }
+    }).catch(function(err) {
+      alert('网络错误: ' + err.message);
+      saveBtn.disabled = false;
+      saveBtn.textContent = '保存';
+    });
+  };
+
+  var cancelBtn = document.createElement('button');
+  cancelBtn.textContent = '取消';
+  cancelBtn.className = 'tree-task-cancel';
+  cancelBtn.onclick = function(ev) {
+    ev.stopPropagation();
+    cancelEdit();
+  };
+
+  var wrap = document.createElement('span');
+  wrap.className = 'tree-task-edit-wrap';
+  wrap.appendChild(input);
+  wrap.appendChild(saveBtn);
+  wrap.appendChild(cancelBtn);
+
+  contentSpan.style.display = 'none';
+  btn.style.display = 'none';
+  row.insertBefore(wrap, btn);
+
+  input.focus();
+  input.select();
+
+  function cancelEdit() {
+    if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+    contentSpan.style.display = '';
+    btn.style.display = '';
+  }
+
+  input.addEventListener('keydown', function(ev) {
+    if (ev.key === 'Escape') cancelEdit();
+    if (ev.key === 'Enter') saveBtn.click();
+  });
+}
+</script>
+{{template "app-layout-end" .}}
