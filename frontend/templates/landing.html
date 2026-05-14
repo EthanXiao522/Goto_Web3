@@ -71,7 +71,6 @@
     <div class="dashboard-block animate-fade-in animate-fade-in-delay-3">
       <h2 class="section-title">阶段进度</h2>
       <div class="phase-rings">
-        <a href="/register" class="phase-ring-card-link">
         <div class="phase-ring-card">
           <svg width="100" height="100" viewBox="0 0 120 120">
             <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border-color)" stroke-width="8"/>
@@ -88,8 +87,6 @@
             <span>74/74 任务完成</span>
           </div>
         </div>
-        </a>
-        <a href="/register" class="phase-ring-card-link">
         <div class="phase-ring-card">
           <svg width="100" height="100" viewBox="0 0 120 120">
             <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border-color)" stroke-width="8"/>
@@ -106,8 +103,6 @@
             <span>28/69 任务完成</span>
           </div>
         </div>
-        </a>
-        <a href="/register" class="phase-ring-card-link">
         <div class="phase-ring-card">
           <svg width="100" height="100" viewBox="0 0 120 120">
             <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border-color)" stroke-width="8"/>
@@ -124,7 +119,6 @@
             <span>7/72 任务完成</span>
           </div>
         </div>
-        </a>
       </div>
     </div>
 
@@ -218,11 +212,9 @@
     </section>
 
     <!-- Mock Gantt -->
-    <section class="landing-preview-section animate-fade-in animate-fade-in-delay-3">
-      <h2 class="section-title" style="text-align:center;margin-bottom:4px">甘特图</h2>
-      <p class="section-subtitle">12 周时间线总览，按阶段着色</p>
-
-      <div class="landing-gantt-v2">
+    <div class="dashboard-block animate-fade-in animate-fade-in-delay-3">
+      <h2 class="section-title">甘特图</h2>
+      <div class="landing-gantt-v2 gantt-week-grid">
         <div class="gantt-v2-header">
           <div class="gantt-v2-label"></div>
           <div class="gantt-v2-weeks">
@@ -232,25 +224,34 @@
           </div>
         </div>
         <div class="gantt-v2-row">
-          <div class="gantt-v2-label"><span class="phase-dot phase-dot-cyan"></span>Phase 1</div>
+          <div class="gantt-v2-label"><span class="phase-dot phase-dot-cyan"></span>阶段 1</div>
           <div class="gantt-v2-bar-area">
-            <div class="gantt-v2-bar gantt-v2-cyan" style="left:0%;width:33.33%">基础夯实</div>
+            <div class="gantt-v2-bar" style="left:0%;width:33.33%">
+              <div class="gantt-v2-bar-fill gantt-v2-cyan" style="width:70%"></div>
+              <span class="gantt-v2-bar-text">基础夯实 70%</span>
+            </div>
           </div>
         </div>
         <div class="gantt-v2-row">
-          <div class="gantt-v2-label"><span class="phase-dot phase-dot-purple"></span>Phase 2</div>
+          <div class="gantt-v2-label"><span class="phase-dot phase-dot-purple"></span>阶段 2</div>
           <div class="gantt-v2-bar-area">
-            <div class="gantt-v2-bar gantt-v2-purple" style="left:33.33%;width:33.33%">核心系统</div>
+            <div class="gantt-v2-bar" style="left:33.33%;width:33.33%">
+              <div class="gantt-v2-bar-fill gantt-v2-purple" style="width:40%"></div>
+              <span class="gantt-v2-bar-text">核心系统 40%</span>
+            </div>
           </div>
         </div>
         <div class="gantt-v2-row">
-          <div class="gantt-v2-label"><span class="phase-dot phase-dot-green"></span>Phase 3</div>
+          <div class="gantt-v2-label"><span class="phase-dot phase-dot-green"></span>阶段 3</div>
           <div class="gantt-v2-bar-area">
-            <div class="gantt-v2-bar gantt-v2-green" style="left:66.67%;width:33.33%">工程化与面试</div>
+            <div class="gantt-v2-bar" style="left:66.67%;width:33.33%">
+              <div class="gantt-v2-bar-fill gantt-v2-green" style="width:10%"></div>
+              <span class="gantt-v2-bar-text">工程化与面试 10%</span>
+            </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
     <section class="landing-cta animate-fade-in animate-fade-in-delay-3">
       <p>登录后可追踪真实学习进度</p>
