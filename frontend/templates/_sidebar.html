@@ -12,12 +12,12 @@
         <span class="nav-icon">◈</span> Dashboard
       </a>
       <a href="/handbook" class="{{if eq .Active "handbook"}}active{{end}}">
-        <span class="nav-icon">📖</span> 学习手册
+        <span class="nav-icon">📖</span> 学习计划书
       </a>
     </div>
     <div class="nav-divider"></div>
     <div class="nav-section">
-      <div class="nav-section-title">学习阶段</div>
+      <div class="nav-section-title">学习进度追踪</div>
       {{range .SidebarPhases}}
       <a href="/phases/{{.ID}}">
         <span class="nav-icon"></span> {{.Title}}

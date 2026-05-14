@@ -178,7 +178,7 @@ func (s *ProgressService) GetDashboard(userID uint64) (*DashboardData, error) {
 		JOIN weeks w ON w.id = d.week_id
 		JOIN phases p ON p.id = w.phase_id
 		WHERE ut.user_id = ?
-		ORDER BY ut.updated_at DESC LIMIT 5`, userID)
+		ORDER BY ut.updated_at DESC LIMIT 50`, userID)
 	if err != nil {
 		return nil, fmt.Errorf("dashboard recent: %w", err)
 	}

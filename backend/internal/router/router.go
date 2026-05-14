@@ -22,13 +22,14 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 
 	// Template functions
 	funcMap := template.FuncMap{
-		"percent": func(a, b int) int {
-			if b == 0 {
+		"percent": func(a, b any) int {
+			ai, bi := toInt(a), toInt(b)
+			if bi == 0 {
 				return 0
 			}
-			return int(math.Round(float64(a) / float64(b) * 100))
+			return int(math.Round(float64(ai) / float64(bi) * 100))
 		},
-		"multiply": func(a float64, b float64) float64 { return a * b },
+		"multiply": func(a, b any) float64 { return toFloat(a) * toFloat(b) },
 		"phaseColor": func(num any) string {
 			n := toInt(num)
 			switch n {
@@ -69,6 +70,28 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 		},
 		"ganttWeekLeft": func(weekNum any) float64 {
 			return float64(toInt(weekNum)-1) / 12.0 * 100
+		},
+		"barColor": func(weekNum any) string {
+			n := toInt(weekNum)
+			switch {
+			case n <= 4:
+				return "#00f0ff"
+			case n <= 8:
+				return "#b347ea"
+			default:
+				return "#00ff88"
+			}
+		},
+		"barGradient": func(weekNum any) template.CSS {
+			n := toInt(weekNum)
+			switch {
+			case n <= 4:
+				return "linear-gradient(180deg,#00f0ff,#00f0ff44)"
+			case n <= 8:
+				return "linear-gradient(180deg,#b347ea,#b347ea44)"
+			default:
+				return "linear-gradient(180deg,#00ff88,#00ff8844)"
+			}
 		},
 		"fieldValue": func(ut *model.UserTask, field string) string {
 			if ut == nil {
@@ -171,6 +194,22 @@ func toInt(v any) int {
 		return int(n)
 	case float64:
 		return int(n)
+	}
+	return 0
+}
+
+func toFloat(v any) float64 {
+	switch n := v.(type) {
+	case float64:
+		return n
+	case int:
+		return float64(n)
+	case int64:
+		return float64(n)
+	case uint8:
+		return float64(n)
+	case uint64:
+		return float64(n)
 	}
 	return 0
 }
