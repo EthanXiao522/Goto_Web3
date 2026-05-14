@@ -9,7 +9,7 @@ type Week struct {
 	Goal         string `json:"goal"`
 	Deliverables string `json:"deliverables"`
 	SortOrder    int    `json:"sort_order"`
-	DayCount     int    `json:"day_count,omitempty"`
-	TaskCount    int    `json:"task_count,omitempty"`
-	CompletedCount int  `json:"completed_count,omitempty"`
+	DayCount     int    `json:"day_count"`
+	TaskCount    int    `json:"task_count"`
+	CompletedCount int  `json:"completed_count"`
 }

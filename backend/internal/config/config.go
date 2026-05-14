@@ -11,7 +11,7 @@ type Config struct {
 func Load() *Config {
 	return &Config{
 		Port:      getEnv("PORT", "8080"),
-		DBDSN:     getEnv("DB_DSN", "root:web3pass@tcp(127.0.0.1:3306)/web3_learning?parseTime=true&charset=utf8mb4"),
+		DBDSN:     getEnv("DB_DSN", "gotoweb3:Goto@Web3@tcp(127.0.0.1:3306)/goto_web3?parseTime=true&charset=utf8mb4"),
 		JWTSecret: getEnv("JWT_SECRET", "dev-secret-change-in-production"),
 	}
 }

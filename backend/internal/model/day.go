@@ -6,6 +6,6 @@ type Day struct {
 	DayNumber      uint8  `json:"day_number"`
 	Title          string `json:"title"`
 	SortOrder      int    `json:"sort_order"`
-	TaskCount      int    `json:"task_count,omitempty"`
-	CompletedCount int    `json:"completed_count,omitempty"`
+	TaskCount      int    `json:"task_count"`
+	CompletedCount int    `json:"completed_count"`
 }

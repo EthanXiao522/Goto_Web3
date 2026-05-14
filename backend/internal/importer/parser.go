@@ -156,7 +156,6 @@ func (p *parser) processLine(line string) {
 		p.processDayHeader(reDayH4Alt.FindStringSubmatch(line))
 
 	case reCheckpoint.MatchString(line):
-		p.flushDay()
 		p.state = stateInCheckpoint
 
 	case reTask.MatchString(line):

@@ -21,13 +21,14 @@ func (r *UserTaskRepo) LazyCreate(userID, taskID uint64) (*model.UserTask, error
 
 func (r *UserTaskRepo) FindByUserAndTask(userID, taskID uint64) (*model.UserTask, error) {
 	ut := &model.UserTask{}
+	var learningLinks, implPlan, implCode, expSummary sql.NullString
 	err := r.DB.QueryRow(
 		`SELECT id, user_id, task_id, is_completed, completed_at,
 		        learning_links, implementation_plan, implementation_code, experience_summary,
 		        created_at, updated_at
 		FROM user_tasks WHERE user_id = ? AND task_id = ?`, userID, taskID,
 	).Scan(&ut.ID, &ut.UserID, &ut.TaskID, &ut.IsCompleted, &ut.CompletedAt,
-		&ut.LearningLinks, &ut.ImplementationPlan, &ut.ImplementationCode, &ut.ExperienceSummary,
+		&learningLinks, &implPlan, &implCode, &expSummary,
 		&ut.CreatedAt, &ut.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, ErrNotFound
@@ -35,6 +36,10 @@ func (r *UserTaskRepo) FindByUserAndTask(userID, taskID uint64) (*model.UserTask
 	if err != nil {
 		return nil, fmt.Errorf("user_task find: %w", err)
 	}
+	ut.LearningLinks = learningLinks.String
+	ut.ImplementationPlan = implPlan.String
+	ut.ImplementationCode = implCode.String
+	ut.ExperienceSummary = expSummary.String
 	return ut, nil
 }
 
@@ -103,11 +108,16 @@ func (r *UserTaskRepo) FindByUserAndTaskIDs(userID uint64, taskIDs []uint64) (ma
 	result := make(map[uint64]*model.UserTask)
 	for rows.Next() {
 		ut := &model.UserTask{}
+		var learningLinks, implPlan, implCode, expSummary sql.NullString
 		if err := rows.Scan(&ut.ID, &ut.UserID, &ut.TaskID, &ut.IsCompleted, &ut.CompletedAt,
-			&ut.LearningLinks, &ut.ImplementationPlan, &ut.ImplementationCode, &ut.ExperienceSummary,
+			&learningLinks, &implPlan, &implCode, &expSummary,
 			&ut.CreatedAt, &ut.UpdatedAt); err != nil {
 			return nil, fmt.Errorf("user_task batch scan: %w", err)
 		}
+		ut.LearningLinks = learningLinks.String
+		ut.ImplementationPlan = implPlan.String
+		ut.ImplementationCode = implCode.String
+		ut.ExperienceSummary = expSummary.String
 		result[ut.TaskID] = ut
 	}
 	return result, rows.Err()

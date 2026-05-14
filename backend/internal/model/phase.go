@@ -8,7 +8,7 @@ type Phase struct {
 	Goal         string  `json:"goal"`
 	Deliverables string  `json:"deliverables"`
 	SortOrder    int     `json:"sort_order"`
-	WeekCount    int     `json:"week_count,omitempty"`
-	TaskCount    int     `json:"task_count,omitempty"`
-	CompletedCount int   `json:"completed_count,omitempty"`
+	WeekCount    int     `json:"week_count"`
+	TaskCount    int     `json:"task_count"`
+	CompletedCount int   `json:"completed_count"`
 }
