@@ -104,7 +104,7 @@
 |  |  | mysql:8.0    |<----->| Go App (alpine)          |  |   |
 |  |  | Port:3306    |network| Port:8080                |  |   |
 |  |  | Volume       |       | Multi-stage build        |  |   |
-|  |  | Healthcheck  |       | templates/ + static/     |  |   |
+|  |  | Healthcheck  |       | frontend: templates + static |  |   |
 |  |  +--------------+       +--------------------------+  |   |
 |  +------------------------------------------------------+   |
 +--------------------------------------------------------------+
@@ -157,7 +157,7 @@ Browser Request ──► Gin Router
   |  |  MySQL 8.0 |   |  Go App :8080  | |
   |  |  Container |   |  Container     | |
   |  |  vol:mysql |   |  build:alpine  | |
-  |  |  healthck  |   |  templates+CSS | |
+  |  |  healthck  |   | frontend assets | |
   |  +-----+------+   +-------+--------+ |
   |        +-- internal net --+          |
   +--------------------------------------+
@@ -207,11 +207,14 @@ Goto_Web3/
 │   │   └── importer/
 │   │       ├── parser.go               # MD 状态机解析
 │   │       └── seeder.go               # DB 填充 (INSERT IGNORE)
-│   ├── templates/ (10 .html)           # Go html/template
-│   ├── static/{css,js,lib}/            # 静态资源
+│   ├── test/                           # 集成测试 (3 files, 15 tests)
 │   ├── go.mod / go.sum
-│   └── Dockerfile
-├── docker-compose.yml
+│   └── migrations/                     # SQL 迁移脚本
+├── frontend/
+│   ├── templates/ (10 .html)           # Go html/template SSR
+│   └── static/{css,js,lib}/            # 静态资源 (CSS ~600行, JS)
+├── Dockerfile                          # 多阶段构建 (golang→alpine)
+├── docker-compose.yml                  # MySQL 8.0 + App
 ├── sources/                            # 源 Markdown
 │   ├── web3_infra_handbook.md
 │   └── web3_infra_3month_plan.md
@@ -237,9 +240,9 @@ Goto_Web3/
 | handler | 8 | Auth, Phase, Week, Task, Progress, Dashboard, Gantt, Handbook |
 | router | 1 | 公开路由 + JWT 保护路由 + API 路由分组 |
 | importer | 2 | 状态机解析 MD + INSERT IGNORE 幂等导入 |
-| templates | 10 | landing/login/register/dashboard/phases/phase_detail/week_detail/task_detail/gantt/handbook |
-| static/css | 1 | 赛博朋克主题: 变量/布局/卡片/表单/进度/手风琴/Tab/甘特图/动效/响应式 |
-| static/js | 5 | app(认证/粒子/Toast/侧边栏) / phase(手风琴/勾选) / task(Tab/预览/保存) / dashboard(进度环) / gantt(甘特图) |
+| frontend/templates | 10 | landing/login/register/dashboard/phases/phase_detail/week_detail/task_detail/gantt/handbook |
+| frontend/static/css | 1 | 赛博朋克主题: 变量/布局/卡片/表单/进度/手风琴/Tab/甘特图/动效/响应式 |
+| frontend/static/js | 5 | app(认证/粒子/Toast/侧边栏) / phase(手风琴/勾选) / task(Tab/预览/保存) / dashboard(进度环) / gantt(甘特图) |
 | cmd/server | 1 | 入口: config → DB → migrate → router → Listen:8080 |
 | cmd/seed | 1 | 入口: config → DB → parser → seeder |
 | Docker | 2 | Dockerfile(多阶段) + docker-compose(MySQL+App) |
@@ -701,17 +704,17 @@ main() → config.Load() → database.Connect()
 # Stage 1: Build
 FROM golang:1.21-alpine AS builder
 WORKDIR /app
-COPY go.mod go.sum ./
+COPY backend/go.mod backend/go.sum ./
 RUN go mod download
-COPY . .
+COPY backend/ ./
 RUN CGO_ENABLED=0 go build -o /server cmd/server/main.go
 
 # Stage 2: Runtime
 FROM alpine:3.19
 RUN apk add --no-cache ca-certificates tzdata
 COPY --from=builder /server /server
-COPY templates/ /templates/
-COPY static/ /static/
+COPY frontend/templates/ /templates/
+COPY frontend/static/ /static/
 EXPOSE 8080
 CMD ["/server"]
 ```
@@ -733,7 +736,7 @@ services:
       retries: 10
 
   app:
-    build: ./backend
+    build: .
     environment:
       PORT: "8080"
       DB_DSN: "root:${MYSQL_ROOT_PASSWORD:-web3pass}@tcp(mysql:3306)/web3_learning?parseTime=true&charset=utf8mb4"

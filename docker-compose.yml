@@ -14,7 +14,7 @@ services:
       retries: 10
 
   app:
-    build: ./backend
+    build: .
     environment:
       PORT: "8080"
       DB_DSN: "root:${MYSQL_ROOT_PASSWORD:-web3pass}@tcp(mysql:3306)/web3_learning?parseTime=true&charset=utf8mb4"

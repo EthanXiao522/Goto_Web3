@@ -77,8 +77,8 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 		},
 	}
 	r.SetFuncMap(funcMap)
-	r.LoadHTMLGlob("templates/*.html")
-	r.Static("/static", "./static")
+	r.LoadHTMLGlob("../frontend/templates/*.html")
+	r.Static("/static", "../frontend/static")
 
 	// Repos
 	userRepo := &repository.UserRepo{DB: db}

@@ -441,11 +441,14 @@ Goto_Web3/
 │   │   ├── handler/                 # 8 个 HTTP 处理器
 │   │   ├── router/router.go         # 路由注册
 │   │   └── importer/                # MD 解析器 + 填充器
-│   ├── templates/ (10 .html)        # Go 模板
-│   ├── static/{css,js,lib}/         # 静态资源
+│   ├── test/                        # 集成测试 (15 tests)
 │   ├── go.mod / go.sum
-│   └── Dockerfile
-├── docker-compose.yml
+│   └── migrations/                  # SQL 迁移
+├── frontend/
+│   ├── templates/ (10 .html)        # Go html/template SSR
+│   └── static/{css,js,lib}/         # 静态资源
+├── Dockerfile                       # 多阶段构建
+├── docker-compose.yml               # MySQL 8.0 + App
 ├── sources/                         # 源 Markdown
 │   ├── web3_infra_handbook.md
 │   └── web3_infra_3month_plan.md
