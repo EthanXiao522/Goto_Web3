@@ -59,7 +59,56 @@ func (h *PageHandler) RegisterPage(c *gin.Context) {
 func (h *PageHandler) Dashboard(c *gin.Context) {
 	userID := c.GetUint64("user_id")
 	data, _ := h.progressService.GetDashboard(userID)
-	c.HTML(http.StatusOK, "dashboard.html", h.baseData(c, "Dashboard", "dashboard", gin.H{"Data": data}))
+	phases, _ := h.phaseRepo.GetAllWithProgress(userID)
+
+	// Gantt: weeks with progress
+	var ganttPhases []gin.H
+	for _, p := range phases {
+		weeks, _ := h.weekRepo.FindByPhaseWithProgress(p.ID, userID)
+		var wi []gin.H
+		for _, w := range weeks {
+			wi = append(wi, gin.H{
+				"WeekNumber": w.WeekNumber, "Title": w.Title,
+				"TaskCount": w.TaskCount, "CompletedCount": w.CompletedCount,
+			})
+		}
+		ganttPhases = append(ganttPhases, gin.H{
+			"ID": p.ID, "PhaseNumber": p.PhaseNumber, "Title": p.Title,
+			"WeekCount": len(weeks), "Weeks": wi,
+			"TaskCount": p.TaskCount, "CompletedCount": p.CompletedCount,
+		})
+	}
+
+	// Day gantt: group days under weeks
+	var dayGanttPhases []gin.H
+	for _, p := range phases {
+		weeks, _ := h.weekRepo.FindByPhase(p.ID)
+		var dayWeeks []gin.H
+		for _, w := range weeks {
+			days, _ := h.dayRepo.FindByWeekWithProgress(w.ID, userID)
+			var di []gin.H
+			for _, d := range days {
+				di = append(di, gin.H{
+					"DayNumber": d.DayNumber, "Title": d.Title,
+					"TaskCount": d.TaskCount, "CompletedCount": d.CompletedCount,
+				})
+			}
+			dayWeeks = append(dayWeeks, gin.H{
+				"WeekNumber": w.WeekNumber, "Days": di, "DayCount": len(days),
+			})
+		}
+		dayGanttPhases = append(dayGanttPhases, gin.H{
+			"ID": p.ID, "PhaseNumber": p.PhaseNumber, "Title": p.Title,
+			"Weeks": dayWeeks,
+		})
+	}
+
+	c.HTML(http.StatusOK, "dashboard.html", h.baseData(c, "Dashboard", "dashboard", gin.H{
+		"Data":          data,
+		"Phases":        phases,
+		"GanttPhases":   ganttPhases,
+		"DayGanttPhases": dayGanttPhases,
+	}))
 }
 
 func (h *PageHandler) PhaseList(c *gin.Context) {

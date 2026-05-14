@@ -340,13 +340,18 @@ body { padding-top: 63px; }
 
 .sidebar-nav .nav-section-title {
   font-family: var(--font-display);
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 2px;
   padding: 0 8px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+}
+.nav-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+  margin: 8px 12px 20px;
 }
 
 .sidebar-nav a {
@@ -2158,4 +2163,33 @@ textarea.form-input {
   margin-bottom: 8px;
   padding-bottom: 6px;
   border-bottom: 1px solid var(--border-color);
+}
+
+/* --- Day Gantt Bars --- */
+.gantt-v2-day-area { height: 22px; }
+.gantt-day-bar {
+  position: absolute;
+  top: 2px;
+  height: 18px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.gantt-day-bar:hover { border-color: var(--accent-cyan); }
+.gantt-day-bar-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: rgba(0,240,255,0.15);
+  transition: width 0.5s ease;
+}
+
+/* --- Section Dividers --- */
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 32px 0;
+  opacity: 0.5;
 }

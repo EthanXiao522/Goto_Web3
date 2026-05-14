@@ -61,14 +61,14 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 			json.Unmarshal([]byte(raw), &urls)
 			return urls
 		},
-		"ganttLeft": func(phaseNum uint8) float64 {
-			return float64(phaseNum-1) * 33.33
+		"ganttLeft": func(phaseNum any) float64 {
+			return float64(toInt(phaseNum)-1) * 33.33
 		},
-		"ganttWidth": func(weekCount int) float64 {
-			return float64(weekCount) / 12.0 * 100
+		"ganttWidth": func(weekCount any) float64 {
+			return float64(toInt(weekCount)) / 12.0 * 100
 		},
-		"ganttWeekLeft": func(weekNum int) float64 {
-			return float64(weekNum-1) / 12.0 * 100
+		"ganttWeekLeft": func(weekNum any) float64 {
+			return float64(toInt(weekNum)-1) / 12.0 * 100
 		},
 		"fieldValue": func(ut *model.UserTask, field string) string {
 			if ut == nil {
@@ -149,11 +149,9 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 	authPages.Use(middleware.Auth(jwtSecret))
 	{
 		authPages.GET("/dashboard", pageHandler.Dashboard)
-		authPages.GET("/phases", pageHandler.PhaseList)
 		authPages.GET("/phases/:id", pageHandler.PhaseDetail)
 		authPages.GET("/weeks/:id", pageHandler.WeekDetail)
 		authPages.GET("/tasks/:id", pageHandler.TaskDetail)
-		authPages.GET("/gantt", pageHandler.Gantt)
 		authPages.GET("/handbook", pageHandler.Handbook)
 			authPages.GET("/profile", pageHandler.ProfilePage)
 	}

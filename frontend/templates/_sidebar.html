@@ -11,16 +11,11 @@
       <a href="/dashboard" class="{{if eq .Active "dashboard"}}active{{end}}">
         <span class="nav-icon">◈</span> Dashboard
       </a>
-      <a href="/phases" class="{{if eq .Active "phases"}}active{{end}}">
-        <span class="nav-icon">📋</span> 任务计划
-      </a>
-      <a href="/gantt" class="{{if eq .Active "gantt"}}active{{end}}">
-        <span class="nav-icon">📊</span> 甘特图
-      </a>
       <a href="/handbook" class="{{if eq .Active "handbook"}}active{{end}}">
         <span class="nav-icon">📖</span> 学习手册
       </a>
     </div>
+    <div class="nav-divider"></div>
     <div class="nav-section">
       <div class="nav-section-title">学习阶段</div>
       {{range .SidebarPhases}}
