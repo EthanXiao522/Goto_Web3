@@ -178,6 +178,7 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 		authPages.GET("/weeks/:id", pageHandler.WeekDetail)
 		authPages.GET("/tasks/:id", pageHandler.TaskDetail)
 		authPages.GET("/handbook", pageHandler.Handbook)
+			authPages.GET("/handbook/source", pageHandler.HandbookSource)
 			authPages.GET("/profile", pageHandler.ProfilePage)
 	}
 

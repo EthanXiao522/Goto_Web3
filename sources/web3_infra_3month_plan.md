@@ -40,6 +40,7 @@
 > **阶段目标：** Go 并发编程熟练化，理解 EVM 核心数据模型（账户/交易/区块/事件），能独立写出一个可运行的链监听器。
 >
 > **阶段产出：**
+>
 > - `chain-listener/` 项目仓库（WebSocket 订阅 + HTTP fallback + Reorg 处理）
 > - Kafka producer/consumer 初步集成
 > - 去重与幂等写入机制
@@ -334,6 +335,7 @@
 > **阶段目标：** 在 Listener 基础上构建钱包后端核心系统（充值检测/提现/nonce管理/签名服务），完成两项目串联。
 >
 > **阶段产出：**
+>
 > - `wallet-backend/` 项目仓库（HD 钱包 / 充值 / 提现 / Nonce / 签名）
 > - Nonce Manager（并发安全分配 + gap 检测 + replacement）
 > - 充提全流程集成测试通过
@@ -643,6 +645,7 @@
 > **阶段目标：** 将项目部署到 K8S，完善 CI/CD 和可观测性，系统设计复习与 Mock Interview，投递简历拿到面试。
 >
 > **阶段产出：**
+>
 > - K8S 部署文件 + Helm Chart
 > - Prometheus + Grafana 监控面板（含告警规则）
 > - GitHub Actions CI/CD pipeline

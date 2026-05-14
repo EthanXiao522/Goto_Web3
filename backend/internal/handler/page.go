@@ -1,15 +1,18 @@
 package handler
 
 import (
+	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
 	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	gomarkdown "github.com/gomarkdown/markdown"
+	mdhtml "github.com/gomarkdown/markdown/html"
+	mdparser "github.com/gomarkdown/markdown/parser"
 
 	"github.com/xyd/web3-learning-tracker/internal/model"
 	"github.com/xyd/web3-learning-tracker/internal/repository"
@@ -350,37 +353,38 @@ func (h *PageHandler) LearningTasks(c *gin.Context) {
 	}))
 }
 
+var reTOC = regexp.MustCompile(`(?m)^\[TOC\]\s*\n?`)
+
 func (h *PageHandler) Handbook(c *gin.Context) {
 	data, err := os.ReadFile("../sources/web3_infra_3month_plan.md")
 	if err != nil {
 		slog.Error("read handbook md failed", "err", err)
 		c.HTML(http.StatusOK, "handbook.html", h.baseData(c, "学习计划书", "handbook", gin.H{
-			"Content": "<p>手册内容加载失败</p>",
+			"Content": template.HTML("<p>手册内容加载失败</p>"),
 			"TOC":     []gin.H{},
 		}))
 		return
 	}
 	raw := string(data)
-	toc := extractTOC(raw)
+
+	// Strip [TOC] placeholder from markdown
+	clean := reTOC.ReplaceAllString(raw, "")
+
+	extensions := mdparser.CommonExtensions | mdparser.AutoHeadingIDs
+	parser := mdparser.NewWithExtensions(extensions)
+	doc := parser.Parse([]byte(clean))
+	renderer := mdhtml.NewRenderer(mdhtml.RendererOptions{
+		Flags: mdhtml.CommonFlags,
+	})
+	html := gomarkdown.Render(doc, renderer)
+
 	c.HTML(http.StatusOK, "handbook.html", h.baseData(c, "学习计划书", "handbook", gin.H{
-		"RawContent": raw,
-		"TOC":        toc,
+		"Content": template.HTML(html),
 	}))
 }
 
-func extractTOC(md string) []gin.H {
-	var toc []gin.H
-	re := regexp.MustCompile(`(?m)^(#{1,4})\s+(.+)$`)
-	matches := re.FindAllStringSubmatch(md, -1)
-	for _, m := range matches {
-		level := len(m[1])
-		title := strings.TrimSpace(m[2])
-		anchor := strings.ToLower(title)
-		anchor = regexp.MustCompile(`[^\w一-鿿]+`).ReplaceAllString(anchor, "-")
-		anchor = strings.Trim(anchor, "-")
-		toc = append(toc, gin.H{"Level": level, "Title": title, "Anchor": anchor})
-	}
-	return toc
+func (h *PageHandler) HandbookSource(c *gin.Context) {
+	c.File("../sources/web3_infra_3month_plan.md")
 }
 
 func (h *PageHandler) Demo(c *gin.Context) {

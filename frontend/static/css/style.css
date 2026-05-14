@@ -2396,6 +2396,22 @@ textarea.form-input {
   opacity: 0.5;
 }
 
+/* --- Handbook Source Bar --- */
+.handbook-source-bar {
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  background: var(--accent-cyan-dim);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+.handbook-source-bar a {
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+.handbook-source-bar a:hover { color: #33f5ff; }
+
 /* --- Task Tree (Learning Tasks Page) --- */
 .task-tree {
   display: flex;

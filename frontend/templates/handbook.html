@@ -1,26 +1,10 @@
 {{template "app-layout" .}}
 <div class="handbook-page">
-  <div class="handbook-layout">
-    <aside class="handbook-sidebar">
-      <h3>目录</h3>
-      <nav class="handbook-toc" id="handbookTOC">
-        {{range .TOC}}<a href="#{{.Anchor}}" class="toc-item toc-level-{{.Level}}">{{.Title}}</a>{{end}}
-      </nav>
-    </aside>
-    <div class="handbook-content markdown-body" id="handbookContent"></div>
+  <div class="handbook-content markdown-body">
+    <div class="handbook-source-bar">
+      <span>📄 源文档：</span><a href="/handbook/source" target="_blank">web3_infra_3month_plan.md</a>
+    </div>
+    {{.Content}}
   </div>
 </div>
-<script id="mdSource" type="text/plain">{{.RawContent}}</script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script>
-(function(){
-  var raw = document.getElementById('mdSource').textContent;
-  document.getElementById('handbookContent').innerHTML = marked.parse(raw);
-
-  document.querySelectorAll('.handbook-content h1, .handbook-content h2, .handbook-content h3, .handbook-content h4').forEach(function(el){
-    var anchor = el.textContent.toLowerCase().replace(/[^\w一-鿿]+/g,'-').replace(/^-|-$/g,'');
-    el.id = anchor;
-  });
-})();
-</script>
 {{template "app-layout-end" .}}
