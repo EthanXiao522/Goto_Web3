@@ -6,6 +6,7 @@
 *.dylib
 backend/cmd/server/server
 backend/cmd/seed/seed
+backend/server
 
 # --- Test binary ---
 *.test
