@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web3 Infra Learning Tracker</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="landing-container">
+<canvas id="particles-canvas"></canvas>
+<div class="landing-page">
+  <div class="hero">
+    <div class="hero-logo animate-fade-in">WEB3 INFRA</div>
+    <p class="hero-subtitle animate-fade-in animate-fade-in-delay-1">
+      从 Java 后端到 Web3 基础设施工程师<br>
+      12 周冲刺计划 · 232 个任务 · 系统化追踪每一步
+    </p>
+    <div class="hero-actions animate-fade-in animate-fade-in-delay-2">
+      <a href="/login" class="btn btn-outline btn-lg">登录</a>
+      <a href="/register" class="btn btn-primary btn-lg">开始学习</a>
+    </div>
+  </div>
+  <div class="features animate-fade-in animate-fade-in-delay-3">
+    <div class="feature-card card-glow-cyan">
+      <div class="feature-icon">📋</div>
+      <div class="feature-title">任务追踪</div>
+      <div class="feature-desc">3 个 Phase · 12 周 · 84 天 · 232 个具体任务<br>逐项勾选完成，进度一目了然</div>
+    </div>
+    <div class="feature-card card-glow-purple">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">甘特图总览</div>
+      <div class="feature-desc">12 周时间线可视化，按阶段着色<br>支持周/日粒度切换</div>
+    </div>
+    <div class="feature-card card-glow-green">
+      <div class="feature-icon">📝</div>
+      <div class="feature-title">学习笔记</div>
+      <div class="feature-desc">每个任务可提交学习链接、落地计划、<br>代码实现和经验总结（Markdown）</div>
+    </div>
+  </div>
+  <div style="text-align:center;padding-bottom:60px;color:var(--text-muted);font-size:0.8rem">
+    基于 Go + Gin + MySQL · 科技感赛博朋克主题
+  </div>
+</div>
+</div>
+<script>
+(function(){var c=document.getElementById('particles-canvas');if(!c)return;var ctx=c.getContext('2d');var p=[];function rs(){c.width=window.innerWidth;c.height=window.innerHeight;}window.addEventListener('resize',rs);rs();for(var i=0;i<100;i++){p.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,radius:Math.random()*1.5+0.5,alpha:Math.random()*0.5+0.2});}function an(){ctx.clearRect(0,0,c.width,c.height);p.forEach(function(pp){pp.x+=pp.vx;pp.y+=pp.vy;if(pp.x<0)pp.x=c.width;if(pp.x>c.width)pp.x=0;if(pp.y<0)pp.y=c.height;if(pp.y>c.height)pp.y=0;ctx.beginPath();ctx.arc(pp.x,pp.y,pp.radius,0,Math.PI*2);ctx.fillStyle='rgba(0,240,255,'+pp.alpha+')';ctx.fill();});for(var i=0;i<p.length;i++){for(var j=i+1;j<p.length;j++){var dx=p[i].x-p[j].x,dy=p[i].y-p[j].y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<120){ctx.beginPath();ctx.moveTo(p[i].x,p[i].y);ctx.lineTo(p[j].x,p[j].y);ctx.strokeStyle='rgba(0,240,255,'+(0.08*(1-dist/120))+')';ctx.lineWidth=0.5;ctx.stroke();}}}requestAnimationFrame(an);}an();})();
+</script>
+</body>
+</html>

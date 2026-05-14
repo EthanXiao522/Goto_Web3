@@ -1,0 +1,37 @@
+{{define "sidebar"}}
+<aside class="sidebar open" id="sidebar">
+  <button class="sidebar-toggle" onclick="toggleSidebar()" title="折叠/展开侧边栏">◀</button>
+  <div class="sidebar-brand">
+    <div class="logo">WEB3 INFRA</div>
+    <div class="logo-sub">Learning Tracker</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-title">主菜单</div>
+      <a href="/dashboard" class="{{if eq .Active "dashboard"}}active{{end}}">
+        <span class="nav-icon">◈</span> Dashboard
+      </a>
+      <a href="/phases" class="{{if eq .Active "phases"}}active{{end}}">
+        <span class="nav-icon">📋</span> 任务计划
+      </a>
+      <a href="/gantt" class="{{if eq .Active "gantt"}}active{{end}}">
+        <span class="nav-icon">📊</span> 甘特图
+      </a>
+      <a href="/handbook" class="{{if eq .Active "handbook"}}active{{end}}">
+        <span class="nav-icon">📖</span> 学习手册
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">学习阶段</div>
+      {{range .SidebarPhases}}
+      <a href="/phases/{{.ID}}">
+        <span class="nav-icon"></span> {{.Title}}
+        <span class="nav-badge">{{if .TaskCount}}{{percent .CompletedCount .TaskCount}}%{{else}}0%{{end}}</span>
+      </a>
+      {{end}}
+    </div>
+  </nav>
+</aside>
+<div class="sidebar-edge-trigger" id="edgeTrigger" style="display:none" onclick="showSidebar()"></div>
+<button class="sidebar-expand-btn" id="expandBtn" onclick="showSidebar()">☰</button>
+{{end}}

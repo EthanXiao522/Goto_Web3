@@ -9,6 +9,20 @@ import (
 
 type DayRepo struct{ DB *sql.DB }
 
+func (r *DayRepo) FindByID(id uint64) (*model.Day, error) {
+	d := &model.Day{}
+	err := r.DB.QueryRow(
+		`SELECT id, week_id, day_number, title, sort_order FROM days WHERE id = ?`, id,
+	).Scan(&d.ID, &d.WeekID, &d.DayNumber, &d.Title, &d.SortOrder)
+	if err == sql.ErrNoRows {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("day find: %w", err)
+	}
+	return d, nil
+}
+
 func (r *DayRepo) FindByWeek(weekID uint64) ([]model.Day, error) {
 	rows, err := r.DB.Query(
 		`SELECT id, week_id, day_number, title, sort_order FROM days WHERE week_id = ? ORDER BY sort_order`, weekID)

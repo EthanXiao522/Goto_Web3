@@ -1,0 +1,14 @@
+{{template "app-layout" .}}
+<div class="handbook-page">
+  <div class="handbook-layout">
+    <aside class="handbook-sidebar">
+      <h3>目录</h3>
+      <nav class="handbook-toc">
+        {{range .TOC}}<a href="#{{.Anchor}}" class="toc-item toc-level-{{.Level}}">{{.Title}}</a>{{end}}
+      </nav>
+    </aside>
+    <div class="handbook-content markdown-body">{{.Content}}</div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{{template "app-layout-end" .}}

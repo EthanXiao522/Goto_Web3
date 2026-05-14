@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登录 - Web3 Infra Tracker</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="auth-container">
+<canvas id="particles-canvas"></canvas>
+<div class="auth-page">
+  <div class="auth-card animate-fade-in">
+    <div class="auth-logo">WEB3 INFRA</div>
+    <div class="auth-subtitle">登录以继续学习之旅</div>
+    <form id="loginForm">
+      <div class="form-group">
+        <label class="form-label" for="email">邮箱</label>
+        <input type="email" id="email" class="form-input" placeholder="your@email.com" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">密码</label>
+        <input type="password" id="password" class="form-input" placeholder="········" required>
+      </div>
+      <div id="loginError" style="color:var(--danger);font-size:0.85rem;margin-top:4px;display:none"></div>
+      <button type="submit" class="btn btn-primary w-full" style="margin-top:8px">登录</button>
+    </form>
+    <div class="auth-footer">还没有账号？<a href="/register">立即注册</a></div>
+  </div>
+</div>
+</div>
+<script>
+(function(){var c=document.getElementById('particles-canvas');if(!c)return;var ctx=c.getContext('2d');var p=[];function rs(){c.width=window.innerWidth;c.height=window.innerHeight;}window.addEventListener('resize',rs);rs();for(var i=0;i<60;i++){p.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,radius:Math.random()*1.5+0.5,alpha:Math.random()*0.3+0.1});}function an(){ctx.clearRect(0,0,c.width,c.height);p.forEach(function(pp){pp.x+=pp.vx;pp.y+=pp.vy;if(pp.x<0)pp.x=c.width;if(pp.x>c.width)pp.x=0;if(pp.y<0)pp.y=c.height;if(pp.y>c.height)pp.y=0;ctx.beginPath();ctx.arc(pp.x,pp.y,pp.radius,0,Math.PI*2);ctx.fillStyle='rgba(0,240,255,'+pp.alpha+')';ctx.fill();});requestAnimationFrame(an);}an();document.getElementById('loginForm').addEventListener('submit',async function(e){e.preventDefault();var em=document.getElementById('email').value;var pw=document.getElementById('password').value;var er=document.getElementById('loginError');try{var r=await fetch('/api/v1/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em,password:pw})});var d=await r.json();if(d.code===200){localStorage.setItem('token',d.data.token);localStorage.setItem('user',JSON.stringify(d.data.user));window.location.href='/dashboard';}else{er.textContent=d.msg||'登录失败';er.style.display='block';}}catch(ex){er.textContent='网络错误，请重试';er.style.display='block';}});})();
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>注册 - Web3 Infra Tracker</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="auth-container">
+<canvas id="particles-canvas"></canvas>
+<div class="auth-page">
+  <div class="auth-card animate-fade-in">
+    <div class="auth-logo">WEB3 INFRA</div>
+    <div class="auth-subtitle">注册开始你的学习之旅</div>
+    <form id="registerForm">
+      <div class="form-group">
+        <label class="form-label" for="username">用户名</label>
+        <input type="text" id="username" class="form-input" placeholder="你的用户名" required minlength="2">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email">邮箱</label>
+        <input type="email" id="email" class="form-input" placeholder="your@email.com" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">密码</label>
+        <input type="password" id="password" class="form-input" placeholder="至少6位" required minlength="6">
+      </div>
+      <div id="regError" style="color:var(--danger);font-size:0.85rem;margin-top:4px;display:none"></div>
+      <button type="submit" class="btn btn-primary w-full" style="margin-top:8px">注册</button>
+    </form>
+    <div class="auth-footer">已有账号？<a href="/login">立即登录</a></div>
+  </div>
+</div>
+</div>
+<script>
+(function(){var c=document.getElementById('particles-canvas');if(!c)return;var ctx=c.getContext('2d');var p=[];function rs(){c.width=window.innerWidth;c.height=window.innerHeight;}window.addEventListener('resize',rs);rs();for(var i=0;i<60;i++){p.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,radius:Math.random()*1.5+0.5,alpha:Math.random()*0.3+0.1});}function an(){ctx.clearRect(0,0,c.width,c.height);p.forEach(function(pp){pp.x+=pp.vx;pp.y+=pp.vy;if(pp.x<0)pp.x=c.width;if(pp.x>c.width)pp.x=0;if(pp.y<0)pp.y=c.height;if(pp.y>c.height)pp.y=0;ctx.beginPath();ctx.arc(pp.x,pp.y,pp.radius,0,Math.PI*2);ctx.fillStyle='rgba(0,240,255,'+pp.alpha+')';ctx.fill();});requestAnimationFrame(an);}an();document.getElementById('registerForm').addEventListener('submit',async function(e){e.preventDefault();var un=document.getElementById('username').value;var em=document.getElementById('email').value;var pw=document.getElementById('password').value;var er=document.getElementById('regError');try{var r=await fetch('/api/v1/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:un,email:em,password:pw})});var d=await r.json();if(d.code===201){window.location.href='/login';}else{er.textContent=d.msg||'注册失败';er.style.display='block';}}catch(ex){er.textContent='网络错误，请重试';er.style.display='block';}});})();
+</script>
+</body>
+</html>

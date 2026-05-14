@@ -1,0 +1,81 @@
+{{template "app-layout" .}}
+<div class="task-detail-page">
+  <div class="breadcrumb-nav"><a href="/phases">学习阶段</a> / <a href="/weeks/{{.Day.WeekID}}">第{{.Week.WeekNumber}}周</a> / <span>任务详情</span></div>
+  <div class="task-nav">
+    {{if .PrevTaskID}}<a href="/tasks/{{.PrevTaskID}}" class="btn btn-outline btn-sm">← 上一个</a>{{end}}
+    {{if .NextTaskID}}<a href="/tasks/{{.NextTaskID}}" class="btn btn-outline btn-sm">下一个 →</a>{{end}}
+  </div>
+  <div class="task-content-card">
+    <div class="task-header">
+      <label class="task-checkbox-label">
+        <input type="checkbox" id="taskComplete" data-task-id="{{.Task.ID}}" {{if .UserTask.IsCompleted}}checked{{end}} onchange="toggleCompleteCb(this)">
+        <span class="checkmark"></span>
+      </label>
+      <h2 class="task-title">{{.Task.Content}}</h2>
+    </div>
+    {{if .Task.ResourceURLs}}
+    <div class="task-resources-bar">资源：{{range .Task.ResourceURLs}}<a href="{{.}}" target="_blank" class="resource-link">{{.}}</a>{{end}}</div>
+    {{end}}
+  </div>
+  <div class="task-editor-card">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('learning_links',this)">学习链接</button>
+      <button class="tab" onclick="switchTab('implementation_plan',this)">落地计划</button>
+      <button class="tab" onclick="switchTab('implementation_code',this)">代码实现</button>
+      <button class="tab" onclick="switchTab('experience_summary',this)">经验总结</button>
+    </div>
+    <div class="tab-panel active" id="panel-learning_links">
+      <div class="editor-toolbar">
+        <button class="btn btn-outline btn-sm" onclick="toggleMode('learning_links')">编辑/预览</button>
+        <span class="save-status" id="saveStatus-learning_links"></span>
+      </div>
+      <div class="editor-area" id="editor-learning_links">
+        <textarea class="editor-textarea" id="textarea-learning_links" placeholder="记录学习资料链接..."
+          oninput="autoSave('learning_links',this.value)">{{.UserTask.LearningLinks}}</textarea>
+      </div>
+      <div class="preview-area markdown-body" id="preview-learning_links" style="display:none"></div>
+    </div>
+    <div class="tab-panel" id="panel-implementation_plan">
+      <div class="editor-toolbar">
+        <button class="btn btn-outline btn-sm" onclick="toggleMode('implementation_plan')">编辑/预览</button>
+        <span class="save-status" id="saveStatus-implementation_plan"></span>
+      </div>
+      <div class="editor-area" id="editor-implementation_plan">
+        <textarea class="editor-textarea" id="textarea-implementation_plan" placeholder="记录落地计划..."
+          oninput="autoSave('implementation_plan',this.value)">{{.UserTask.ImplementationPlan}}</textarea>
+      </div>
+      <div class="preview-area markdown-body" id="preview-implementation_plan" style="display:none"></div>
+    </div>
+    <div class="tab-panel" id="panel-implementation_code">
+      <div class="editor-toolbar">
+        <button class="btn btn-outline btn-sm" onclick="toggleMode('implementation_code')">编辑/预览</button>
+        <span class="save-status" id="saveStatus-implementation_code"></span>
+      </div>
+      <div class="editor-area" id="editor-implementation_code">
+        <textarea class="editor-textarea" id="textarea-implementation_code" placeholder="记录代码实现..."
+          oninput="autoSave('implementation_code',this.value)">{{.UserTask.ImplementationCode}}</textarea>
+      </div>
+      <div class="preview-area markdown-body" id="preview-implementation_code" style="display:none"></div>
+    </div>
+    <div class="tab-panel" id="panel-experience_summary">
+      <div class="editor-toolbar">
+        <button class="btn btn-outline btn-sm" onclick="toggleMode('experience_summary')">编辑/预览</button>
+        <span class="save-status" id="saveStatus-experience_summary"></span>
+      </div>
+      <div class="editor-area" id="editor-experience_summary">
+        <textarea class="editor-textarea" id="textarea-experience_summary" placeholder="记录经验总结..."
+          oninput="autoSave('experience_summary',this.value)">{{.UserTask.ExperienceSummary}}</textarea>
+      </div>
+      <div class="preview-area markdown-body" id="preview-experience_summary" style="display:none"></div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+var saveTimers={};
+async function toggleCompleteCb(cb){var id=cb.dataset.taskId,completed=cb.checked;try{var t=localStorage.getItem('token'),r=await fetch('/api/v1/tasks/'+id+'/complete',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify({completed:completed})}),d=await r.json();if(d.code!==200){cb.checked=!completed;showToast(d.msg||'error','error');}}catch(e){cb.checked=!completed;showToast('网络错误','error');}}
+function switchTab(field,btn){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+field).classList.add('active');}
+function toggleMode(field){var ed=document.getElementById('editor-'+field);var pr=document.getElementById('preview-'+field);var ta=document.getElementById('textarea-'+field);if(pr.style.display==='none'){pr.style.display='block';ed.style.display='none';pr.innerHTML=marked.parse(ta.value||'');}else{pr.style.display='none';ed.style.display='block';}}
+function autoSave(field,value){clearTimeout(saveTimers[field]);saveTimers[field]=setTimeout(async function(){var t=localStorage.getItem('token');var b={};b[field]=value;var s=document.getElementById('saveStatus-'+field);try{var r=await fetch('/api/v1/tasks/{{.Task.ID}}/submissions',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify(b)});var d=await r.json();if(d.code===200){s.textContent='已保存 · '+new Date().toLocaleTimeString();s.style.color='var(--success)';}}catch(e){s.textContent='保存失败';s.style.color='var(--danger)';}},1000);}
+</script>
+{{template "app-layout-end" .}}

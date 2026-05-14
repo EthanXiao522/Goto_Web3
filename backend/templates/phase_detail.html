@@ -1,0 +1,48 @@
+{{template "app-layout" .}}
+<div class="phase-detail-page">
+  <h1 class="page-title">{{.Phase.Title}} <span class="phase-badge phase-badge-{{.Phase.PhaseNumber}}">Phase {{.Phase.PhaseNumber}}</span></h1>
+  {{if .Phase.Goal}}<p class="phase-goal">{{.Phase.Goal}}</p>{{end}}
+  <div class="accordion">
+    {{range $wi, $week := .Weeks}}
+    <div class="accordion-item{{if eq $wi 0}} open{{end}}">
+      <div class="accordion-header" onclick="this.parentElement.classList.toggle('open');var a=this.querySelector('.accordion-arrow');if(a)a.textContent=this.parentElement.classList.contains('open')?'▼':'▶'">
+        <div class="accordion-header-left">
+          <span class="accordion-arrow">▼</span>
+          <span class="accordion-title">第{{$week.WeekNumber}}周 · {{$week.Title}}</span>
+        </div>
+        <span class="accordion-badge">{{$week.CompletedCount}}/{{$week.TaskCount}}</span>
+      </div>
+      <div class="accordion-body">
+        {{if $week.Goal}}<p class="week-goal">目标：{{$week.Goal}}</p>{{end}}
+        {{range $week.Days}}
+        <div class="day-group">
+          <h4 class="day-title">Day {{.DayNumber}} · {{.Title}} <span class="day-progress">{{.CompletedCount}}/{{.TaskCount}}</span></h4>
+          <div class="task-list">
+            {{range .Tasks}}
+            <div class="task-item {{if .IsCheckpoint}}checkpoint{{end}}">
+              <label class="task-checkbox-label">
+                <input type="checkbox" class="task-checkbox" data-task-id="{{.ID}}" {{if .UserCompleted}}checked{{end}} onchange="toggleTaskCb(this)">
+                <span class="checkmark"></span>
+                <span class="task-content">{{.Content}}</span>
+              </label>
+              {{if .ResourceURLs}}
+              <div class="task-resources">
+                {{range .ResourceURLs}}<a href="{{.}}" target="_blank" class="resource-link">📎</a>{{end}}
+              </div>
+              {{end}}
+              {{if .HasSubmission}}<span class="submission-dot has" title="已提交笔记"></span>{{end}}
+              <a href="/tasks/{{.ID}}" class="task-detail-link">详情 →</a>
+            </div>
+            {{end}}
+          </div>
+        </div>
+        {{end}}
+      </div>
+    </div>
+    {{end}}
+  </div>
+</div>
+<script>
+async function toggleTaskCb(cb){var id=cb.dataset.taskId,completed=cb.checked;try{var t=localStorage.getItem('token'),r=await fetch('/api/v1/tasks/'+id+'/complete',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify({completed:completed})}),d=await r.json();if(d.code!==200){cb.checked=!completed;showToast(d.msg||'error','error');}else{showToast(completed?'完成 ✓':'已取消','success');}}catch(e){cb.checked=!completed;showToast('网络错误','error');}}
+</script>
+{{template "app-layout-end" .}}

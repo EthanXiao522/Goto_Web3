@@ -1,0 +1,28 @@
+{{template "app-layout" .}}
+<div class="week-detail-page">
+  <div class="breadcrumb-nav"><a href="/phases">学习阶段</a> / <a href="/phases/{{.Phase.ID}}">{{.Phase.Title}}</a> / <span>第{{.Week.WeekNumber}}周</span></div>
+  <h1 class="page-title">第{{.Week.WeekNumber}}周 · {{.Week.Title}}</h1>
+  {{if .Week.Goal}}<p class="week-goal">{{.Week.Goal}}</p>{{end}}
+  {{range .Days}}
+  <div class="day-section">
+    <h3 class="day-heading">Day {{.DayNumber}} · {{.Title}} <span class="day-progress">{{.CompletedCount}}/{{.TaskCount}}</span></h3>
+    <div class="task-list">
+      {{range .Tasks}}
+      <div class="task-item {{if .IsCheckpoint}}checkpoint{{end}}">
+        <label class="task-checkbox-label">
+          <input type="checkbox" class="task-checkbox" data-task-id="{{.ID}}" {{if .UserCompleted}}checked{{end}} onchange="toggleTaskCb(this)">
+          <span class="checkmark"></span>
+          <span class="task-content">{{.Content}}</span>
+        </label>
+        {{if .ResourceURLs}}<div class="task-resources">{{range .ResourceURLs}}<a href="{{.}}" target="_blank" class="resource-link">📎</a>{{end}}</div>{{end}}
+        <a href="/tasks/{{.ID}}" class="task-detail-link">详情 →</a>
+      </div>
+      {{end}}
+    </div>
+  </div>
+  {{end}}
+</div>
+<script>
+async function toggleTaskCb(cb){var id=cb.dataset.taskId,completed=cb.checked;try{var t=localStorage.getItem('token'),r=await fetch('/api/v1/tasks/'+id+'/complete',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify({completed:completed})}),d=await r.json();if(d.code!==200){cb.checked=!completed;showToast(d.msg||'error','error');}else{showToast(completed?'完成 ✓':'已取消','success');}}catch(e){cb.checked=!completed;showToast('网络错误','error');}}
+</script>
+{{template "app-layout-end" .}}

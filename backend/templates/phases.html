@@ -1,0 +1,23 @@
+{{template "app-layout" .}}
+<div class="phases-page">
+  <h1 class="page-title">学习阶段</h1>
+  <div class="phase-cards-grid">
+    {{range .Phases}}
+    <a href="/phases/{{.ID}}" class="phase-card-link">
+      <div class="phase-card card-glow-{{phaseColorClass .PhaseNumber}}">
+        <div class="phase-card-header">
+          <span class="phase-badge phase-badge-{{.PhaseNumber}}">Phase {{.PhaseNumber}}</span>
+          <span class="phase-progress-text">{{if .TaskCount}}{{percent .CompletedCount .TaskCount}}{{else}}0{{end}}%</span>
+        </div>
+        <h3 class="phase-card-title">{{.Title}}</h3>
+        {{if .Subtitle}}<p class="phase-card-subtitle">{{.Subtitle}}</p>{{end}}
+        <div class="progress-bar" style="margin-top:12px">
+          <div class="progress-fill" style="width:{{if .TaskCount}}{{percent .CompletedCount .TaskCount}}{{else}}0{{end}}%"></div>
+        </div>
+        <div class="phase-card-stats"><span>{{.CompletedCount}}/{{.TaskCount}} 任务完成</span></div>
+      </div>
+    </a>
+    {{end}}
+  </div>
+</div>
+{{template "app-layout-end" .}}

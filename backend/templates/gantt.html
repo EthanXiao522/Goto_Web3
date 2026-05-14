@@ -1,0 +1,34 @@
+{{template "app-layout" .}}
+<div class="gantt-page">
+  <h1 class="page-title">甘特图</h1>
+  <div class="gantt-controls">
+    <button class="btn btn-outline btn-sm active" onclick="switchGanttView('week',this)">周视图</button>
+    <button class="btn btn-outline btn-sm" onclick="switchGanttView('day',this)">日视图</button>
+  </div>
+  <div class="gantt-chart" id="ganttChart">
+    <div class="gantt-header">
+      <div class="gantt-label-col">Phase / Week</div>
+      <div class="gantt-timeline-col" id="ganttTimeline"></div>
+    </div>
+    {{range .Phases}}
+    <div class="gantt-row phase-row">
+      <div class="gantt-label"><span class="phase-badge phase-badge-{{.PhaseNumber}}">P{{.PhaseNumber}}</span> {{.Title}}</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase-bar phase-bar-{{.PhaseNumber}}" style="left:{{ganttLeft .PhaseNumber}}%;width:{{ganttWidth .WeekCount}}%">{{.Title}}</div>
+      </div>
+    </div>
+    {{range .Weeks}}
+    <div class="gantt-row week-row">
+      <div class="gantt-label gantt-label-indent">第{{.WeekNumber}}周</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar week-bar" style="left:{{ganttWeekLeft .WeekNumber}}%;width:8.33%">{{.Title}}</div>
+      </div>
+    </div>
+    {{end}}
+    {{end}}
+  </div>
+</div>
+<script>
+function switchGanttView(view,btn){document.querySelectorAll('.gantt-controls .btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('ganttChart').dataset.view=view;}
+</script>
+{{template "app-layout-end" .}}
