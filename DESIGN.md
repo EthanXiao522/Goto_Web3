@@ -1,6 +1,6 @@
 # Web3 Infra 学习追踪网站 - 开发设计文档
 
-> 版本：v1.0 | 日期：2026-05-14 | 依据：REQUIREMENTS.md v1.0 | 状态：待确认
+> 版本：v1.1 | 日期：2026-05-15 | 依据：REQUIREMENTS.md v1.1 | 状态：已更新
 
 ---
 
@@ -207,11 +207,16 @@ Goto_Web3/
 │   │   └── importer/
 │   │       ├── parser.go               # MD 状态机解析
 │   │       └── seeder.go               # DB 填充 (INSERT IGNORE)
-│   ├── test/                           # 集成测试 (3 files, 15 tests)
+│   ├── test/                           # 集成测试 (5 files, 40 tests)
+│   │   ├── handler_test.go              # Auth + Task + Phase + Progress
+│   │   ├── repository_test.go           # 全 Repository CRUD
+│   │   ├── service_test.go              # ProgressService + TaskService
+│   │   ├── middleware_test.go           # Auth + CORS 中间件
+│   │   └── importer_test.go             # MD 解析
 │   ├── go.mod / go.sum
 │   └── migrations/                     # SQL 迁移脚本
 ├── frontend/
-│   ├── templates/ (10 .html)           # Go html/template SSR
+│   ├── templates/ (12 .html)           # Go html/template SSR（含 learning_tasks, handbook_source）
 │   └── static/{css,js,lib}/            # 静态资源 (CSS ~600行, JS)
 ├── Dockerfile                          # 多阶段构建 (golang→alpine)
 ├── docker-compose.yml                  # MySQL 8.0 + App
@@ -236,11 +241,11 @@ Goto_Web3/
 | middleware | 3 | JWT 认证 / CORS 跨域 / slog 请求日志 |
 | model | 6 | User, Phase, Week, Day, Task, UserTask |
 | repository | 6 | 每表原生 SQL CRUD，参数化查询，手动 Scan |
-| service | 4 | Auth(注册/登录/JWT) / Task(完成/提交/懒加载) / Progress(聚合) / Dashboard |
-| handler | 8 | Auth, Phase, Week, Task, Progress, Dashboard, Gantt, Handbook |
-| router | 1 | 公开路由 + JWT 保护路由 + API 路由分组 |
+| service | 4 | Auth(注册/登录/JWT) / Task(完成/提交/懒加载/内容编辑+md同步) / Progress(聚合) / Dashboard |
+| handler | 9 | Auth, Phase, Week, Task, Progress, Page(Dashboard/LearningTasks/Handbook/HandbookSource) |
+| router | 1 | 公开路由 + JWT 保护路由 + API 路由分组（含 /tasks, /handbook/source, PUT tasks/:id/content）|
 | importer | 2 | 状态机解析 MD + INSERT IGNORE 幂等导入 |
-| frontend/templates | 10 | landing/login/register/dashboard/phases/phase_detail/week_detail/task_detail/gantt/handbook |
+| frontend/templates | 12 | landing/login/register/dashboard/phases/phase_detail/week_detail/task_detail/gantt/handbook/learning_tasks/handbook_source |
 | frontend/static/css | 1 | 赛博朋克主题: 变量/布局/卡片/表单/进度/手风琴/Tab/甘特图/动效/响应式 |
 | frontend/static/js | 5 | app(认证/粒子/Toast/侧边栏) / phase(手风琴/勾选) / task(Tab/预览/保存) / dashboard(进度环) / gantt(甘特图) |
 | cmd/server | 1 | 入口: config → DB → migrate → router → Listen:8080 |
@@ -563,13 +568,15 @@ INSERT IGNORE INTO user_tasks (user_id, task_id) VALUES (?, ?);
 | Landing | `/` | 粒子星空 Canvas │ 渐变 Hero │ 特性卡片×3 │ 登录/注册入口 |
 | Login | `/login` | 邮箱+密码表单 │ 粒子背景 │ 登录后跳转 Dashboard |
 | Register | `/register` | 用户名+邮箱+密码 │ 唯一性校验 │ 注册成功自动登录 |
-| Dashboard | `/dashboard` | 统计卡片×4 │ SVG 进度环×3 │ 每周进度条×12 │ 最近活动×5 |
-| Phase List | `/phases` | Phase 卡片×3 (青/紫/绿) │ 12 周进度表格 │ 点击进入详情 |
+| Dashboard | `/dashboard` | 4 卡片单行(teal/emerald/violet/amber) │ SVG 进度环×3(金/红/蓝) │ 每周柱状图×12 │ 甘特图(bar-fill+文字) │ 最近活动(分页) |
+| Phase List | `/phases` | Phase 卡片×3 (金/红/蓝) │ 12 周进度表格 │ 点击进入详情 |
 | Phase Detail | `/phases/:id` | **核心页**: 四级手风琴 │ 动画复选框 │ 提交指示点 │ 检查点卡片 |
 | Week Detail | `/weeks/:id` | 单周 Day 分组 │ 任务列表+完成状态 │ 面包屑导航 |
 | Task Detail | `/tasks/:id` | 4 Tab 编辑器 │ 编辑/预览切换 │ marked.js 渲染 │ 自动保存(1s) │ 上/下任务 |
 | Gantt | `/gantt` | 自定义 CSS 甘特图 │ Phase 颜色填充 │ 周/天视图切换 │ 里程碑卡片×4 |
-| Handbook | `/handbook` | handbook.md 服务端渲染 │ 侧边栏章节目录 │ 结构预览卡片 |
+| Handbook | `/handbook` | gomarkdown 服务端渲染 │ 源文档链接 bar │ [TOC] 过滤 │ blockquote 列表修复 |
+| Learning Tasks (NEW) | `/tasks` | 可展开树形表格(阶段→周→天→任务) │ 层级缩进 │ 内联编辑(✎) │ Enter/Escape 快捷 |
+| Handbook Source (NEW) | `/handbook/source` | gomarkdown 渲染 web3_infra_3month_plan.md 为 HTML 页面 |
 
 | 公共组件 | 说明 |
 |----------|------|
@@ -782,13 +789,14 @@ volumes:
 
 ## 11. 测试策略
 
-| 层级 | 类型 | 工具 | 目标 |
+| 层级 | 类型 | 工具 | 覆盖 |
 |------|------|------|------|
-| Repository | 单元测试 | go test + 测试DB | 每个查询方法 |
-| Service | 单元测试 | go test + mock | 核心业务逻辑 |
-| Handler | 集成测试 | httptest + 测试DB | API 端点 |
-| Importer | 单元测试 | go test + fixture MD | 解析准确性 |
-| 前端 | 手动测试 | 浏览器 | 14 条验收标准 |
+| Repository | 单元测试 | go test + 测试DB | 6 repo, 14 tests: CRUD + UpdateContent + FindByUserAndTaskIDs + UpdateFields + FindByPhase/DyWeekWithProgress |
+| Service | 单元测试 | go test + 测试DB | 2 service, 4 tests: ProgressService(GetDashboard/GetOverview) + TaskService(ToggleComplete/UpdateSubmissions) |
+| Handler | 集成测试 | httptest + 测试DB | 4 handler group, 14 tests: Auth(5) + Task(5) + Phase(4) + Progress(2) |
+| Middleware | 单元测试 | httptest + JWT | 2 middleware, 5 tests: Auth(NoToken/Invalid/Valid/Expired) + CORS |
+| Importer | 单元测试 | go test + fixture MD | 2 tests: Parse_RealFile + Parse_Fixture |
+| 前端 | 手动+API测试 | curl + 浏览器 | 19 条验收标准, 32 functional tests |
 
 ---
 
@@ -798,6 +806,7 @@ volumes:
 github.com/gin-gonic/gin
 github.com/go-sql-driver/mysql
 github.com/golang-jwt/jwt/v5
+github.com/gomarkdown/markdown
 golang.org/x/crypto
 ```
 

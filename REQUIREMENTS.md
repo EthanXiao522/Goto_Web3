@@ -1,6 +1,6 @@
 # Web3 Infra 学习追踪网站 - 需求文档
 
-> 版本：v1.0 | 日期：2026-05-14 | 状态：待确认
+> 版本：v1.1 | 日期：2026-05-15 | 状态：已更新
 
 ---
 
@@ -106,6 +106,9 @@
 | FR-2.3 | 任务完成 | 点击复选框标记完成/取消，完成项显示删除线和降低透明度 |
 | FR-2.4 | 进度统计 | Phase 级别: 进度环 + 百分比；Week 级别: 进度条；Day 级别: 完成数 |
 | FR-2.5 | 检查点任务 | Phase 末尾自检清单与普通任务同等对待，可勾选、可提交内容 |
+| FR-2.6 | 学习任务总览 | 新页面 `/tasks`，可展开树形表格（阶段→周→天→任务），层级缩进，每层箭头展开/收起，显示完成状态、学时、资源链接标记 |
+| FR-2.7 | 任务内容编辑 | 任务行内点击「✎」弹出编辑框，支持 Enter 保存 / Escape 取消，调用 PUT `/api/v1/tasks/:id/content` 更新 |
+| FR-2.8 | 任务同步 | 任务内容修改后自动同步到 `sources/web3_infra_3month_plan.md` 源文档对应行 |
 
 ### 3.3 任务提交内容
 
@@ -127,22 +130,27 @@
 | FR-4.3 | 交互 | 悬停显示详情，点击跳转对应 Week |
 | FR-4.4 | 附加信息 | 图例、关键里程碑卡片（Week 4/8/10/12）、12 周数据明细表 |
 | FR-4.5 | 今日标记 | 红色竖线标注当前位置 |
+| FR-4.6 | 首页甘特图 | Landing/Demo/Dashboard 甘特图统一风格：bar-fill 填充 + bar-text 文字 + 12 周网格线 + 中文阶段标签 + 进度百分比 |
 
 ### 3.5 学习手册
 
 | 编号 | 功能 | 说明 |
 |------|------|------|
-| FR-5.1 | 内容渲染 | 服务端解析 handbook.md → HTML |
-| FR-5.2 | 侧边栏目录 | 手册章节导航，点击跳转 |
+| FR-5.1 | 服务端渲染 | 使用 gomarkdown 库在后端将 web3_infra_3month_plan.md 解析为 HTML |
+| FR-5.2 | 源文档链接 | 内容区顶部显示「📄 源文档：web3_infra_3month_plan.md」链接，可点击在新标签页查看完整渲染 |
+| FR-5.3 | 源文档页 | `/handbook/source` 将 md 渲染为 HTML 页面展示（非文件下载） |
+| FR-5.4 | [TOC] 过滤 | 原始 markdown 中的 `[TOC]` 占位符在渲染前自动过滤 |
 
 ### 3.6 Dashboard 仪表盘
 
 | 编号 | 功能 | 说明 |
 |------|------|------|
-| FR-6.1 | 统计卡片 | 总任务数 / 已完成 / 完成率 / 预估剩余时间 |
-| FR-6.2 | Phase 进度环 | 3 个 SVG 圆环，颜色对应 Phase，动画填充 |
-| FR-6.3 | 每周进度条 | 12 周进度条列表，按 Phase 着色 |
-| FR-6.4 | 最近活动 | 最近 5 条活动记录，含时间戳 |
+| FR-6.1 | 统计卡片 | 4 卡片单行展示（stats-grid-four）：总任务数 / 已完成 / 完成阶段 / 总体进度，各独立配色（teal/emerald/violet/amber） |
+| FR-6.2 | Phase 进度环 | 3 个 SVG 圆环，颜色对应 Phase（金/红/蓝），动画填充 |
+| FR-6.3 | 每周进度柱状图 | 12 周柱状图，柱高=完成率×1.2px，按 Phase 着色（金/红/蓝），顶部显示完成数和百分比 |
+| FR-6.4 | 甘特图 | 放在每周进度下方，12 周网格线，bar-fill 填充 + 百分比文字，中文阶段标签 |
+| FR-6.5 | 最近活动 | 最近活动列表，分页展开（5 条→更多），含时间戳 |
+| FR-6.6 | 首页预览 | Landing 页功能预览区 Dashboard/阶段进度/每周进度/甘特图布局与登录后一致，阶段进度卡片不可点击跳转 |
 
 ### 3.7 页面导航
 
@@ -201,7 +209,9 @@ Chrome / Firefox / Edge 最新版，不要求 IE 支持。
 | 7 | Week 详情 | `/weeks/:id` | 是 | 聚焦单周完整任务列表 |
 | 8 | Task 详情 | `/tasks/:id` | 是 | 4 Tab 提交编辑器 |
 | 9 | 甘特图 | `/gantt` | 是 | 12 周甘特图 + 里程碑 |
-| 10 | 学习手册 | `/handbook` | 是 | handbook.md 渲染 |
+| 10 | 学习手册 | `/handbook` | 是 | web3_infra_3month_plan.md 服务端渲染 |
+| 11 | 学习任务 | `/tasks` | 是 | 可展开树形表格（阶段→周→天→任务），内联编辑 |
+| 12 | 源文档 | `/handbook/source` | 是 | web3_infra_3month_plan.md 渲染展示 |
 
 ---
 
@@ -325,8 +335,9 @@ Chrome / Firefox / Edge 最新版，不要求 IE 支持。
 | GET | `/api/v1/weeks/:id` | Week 详情（含 Days+Tasks+完成状态） |
 | GET | `/api/v1/tasks/:id` | Task 详情（含 user_task 提交内容） |
 | PATCH | `/api/v1/tasks/:id/complete` | `{completed:bool}` → 切换完成 |
+| PUT | `/api/v1/tasks/:id/content` | `{content}` → 更新任务内容，自动同步到 md 源文件 |
 | PUT | `/api/v1/tasks/:id/submissions` | 更新四种提交内容 |
-| GET | `/api/v1/progress/overview` | 总体进度统计 |
+| GET | `/api/v1/progress` | 总体进度统计 |
 | GET | `/api/v1/dashboard` | Dashboard 聚合数据 |
 
 ### 7.3 错误码
@@ -350,11 +361,14 @@ Chrome / Firefox / Edge 最新版，不要求 IE 支持。
 | 背景 | `#0a0e1a` | 深蓝黑 |
 | 侧边栏/卡片 | `#111827` / `#1a1f35` | 表面色 |
 | 边框 | `#2a3558` / `#2a4068` | 普通/发光 |
-| 青色 | `#00f0ff` | Phase 1、主强调 |
-| 紫色 | `#7c3aed` | Phase 2 |
-| 绿色 | `#00ff88` | Phase 3、成功 |
+| 金色 | `#ffd700` | Phase 1、主强调 |
+| 红色 | `#ff4466` | Phase 2、错误、今天标记 |
+| 蓝色 | `#4488ff` | Phase 3、成功 |
 | 黄色 | `#ffb700` | 警告、检查点 |
-| 红色 | `#ff3860` | 错误、今天标记 |
+| Teal | `#00e5ff` | 统计卡片「总任务数」|
+| Emerald | `#00e676` | 统计卡片「已完成」|
+| Violet | `#b388ff` | 统计卡片「完成阶段」|
+| Amber | `#ffab00` | 统计卡片「总体进度」|
 | 文字 | `#e2e8f0` / `#94a3b8` / `#64748b` | 主/次/禁用 |
 
 ### 8.2 字体
@@ -421,6 +435,11 @@ cd backend && go run cmd/seed/main.go --plan=../web3_infra_3month_plan.md
 | 12 | 用户隔离 | 用户 A 完成状态不影响用户 B |
 | 13 | 侧边栏 | 隐藏/展开动画 + 左侧边缘滑出按钮 |
 | 14 | Docker | docker-compose up 一键启动全站 |
+| 15 | 学习任务页 | `/tasks` 树形表格可展开/收起，层级缩进正确，编辑功能可用 |
+| 16 | 任务内容编辑 | 编辑后 DB 和 md 源文档同步更新 |
+| 17 | 学习手册 | gomarkdown 服务端渲染，[TOC] 已过滤，源文档链接可用，blockquote 列表换行正确 |
+| 18 | Dashboard 布局 | 4 卡片单行，每周柱状图，甘特图在每周进度下方 |
+| 19 | 配色方案 | Phase 1/2/3 金色/红色/蓝色，统计卡片 teal/emerald/violet/amber |
 
 ---
 
@@ -438,14 +457,19 @@ Goto_Web3/
 │   │   ├── model/                   # 6 个数据结构
 │   │   ├── repository/              # 6 个数据库查询
 │   │   ├── service/                 # 4 个业务服务
-│   │   ├── handler/                 # 8 个 HTTP 处理器
-│   │   ├── router/router.go         # 路由注册
+│   │   ├── handler/                 # 8 个 HTTP 处理器（含 UpdateContent/LearningTasks/HandbookSource）
+│   │   ├── router/router.go         # 路由注册（含 /tasks, /handbook/source）
 │   │   └── importer/                # MD 解析器 + 填充器
-│   ├── test/                        # 集成测试 (15 tests)
+│   ├── test/                        # 集成测试 (5 文件, 40 tests)
+│   │   ├── handler_test.go          # Auth + Task + Phase + Progress 处理器
+│   │   ├── repository_test.go       # 全 Repository CRUD
+│   │   ├── service_test.go          # ProgressService + TaskService
+│   │   ├── middleware_test.go       # Auth + CORS 中间件
+│   │   └── importer_test.go         # MD 解析
 │   ├── go.mod / go.sum
 │   └── migrations/                  # SQL 迁移
 ├── frontend/
-│   ├── templates/ (10 .html)        # Go html/template SSR
+│   ├── templates/ (12 .html)        # Go html/template SSR（含 learning_tasks, handbook_source）
 │   └── static/{css,js,lib}/         # 静态资源
 ├── Dockerfile                       # 多阶段构建
 ├── docker-compose.yml               # MySQL 8.0 + App

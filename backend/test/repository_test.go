@@ -179,3 +179,122 @@ func TestUserTaskRepo_UpdateComplete(t *testing.T) {
 		t.Fatalf("update uncomplete: %v", err)
 	}
 }
+
+func TestTaskRepo_UpdateContent(t *testing.T) {
+	setupRepo(t)
+	defer database.Close()
+
+	repo := &repository.TaskRepo{DB: database.DB}
+
+	task, err := repo.FindByID(1)
+	if err != nil {
+		t.Fatalf("find: %v", err)
+	}
+	original := task.Content
+
+	if err := repo.UpdateContent(1, "[REPO TEST] new content"); err != nil {
+		t.Fatalf("update content: %v", err)
+	}
+
+	task2, err := repo.FindByID(1)
+	if err != nil {
+		t.Fatalf("find after update: %v", err)
+	}
+	if task2.Content != "[REPO TEST] new content" {
+		t.Errorf("expected updated content, got: %s", task2.Content)
+	}
+
+	// Restore
+	repo.UpdateContent(1, original)
+}
+
+func TestTaskRepo_FindIDsByDay(t *testing.T) {
+	setupRepo(t)
+	defer database.Close()
+
+	repo := &repository.TaskRepo{DB: database.DB}
+	ids, err := repo.FindIDsByDay(1)
+	if err != nil {
+		t.Fatalf("find ids by day: %v", err)
+	}
+	if len(ids) == 0 {
+		t.Error("expected non-empty task ids")
+	}
+}
+
+func TestUserTaskRepo_FindByUserAndTaskIDs(t *testing.T) {
+	setupRepo(t)
+	defer database.Close()
+
+	repo := &repository.UserTaskRepo{DB: database.DB}
+	ids := []uint64{1, 2, 3, 10, 20}
+	result, err := repo.FindByUserAndTaskIDs(1, ids)
+	if err != nil {
+		t.Fatalf("find by user and task ids: %v", err)
+	}
+	if result == nil {
+		t.Fatal("expected non-nil result map")
+	}
+	// Should have entries for tasks that the user has accessed
+	_ = len(result)
+}
+
+func TestUserTaskRepo_UpdateFields(t *testing.T) {
+	setupRepo(t)
+	defer database.Close()
+
+	repo := &repository.UserTaskRepo{DB: database.DB}
+	repo.LazyCreate(1, 1)
+
+	fields := map[string]string{
+		"learning_links":     "https://go.dev/tour",
+		"implementation_plan": "test plan",
+	}
+	if err := repo.UpdateFields(1, 1, fields); err != nil {
+		t.Fatalf("update fields: %v", err)
+	}
+
+	ut, err := repo.FindByUserAndTask(1, 1)
+	if err != nil {
+		t.Fatalf("find after update fields: %v", err)
+	}
+	if ut.LearningLinks != "https://go.dev/tour" {
+		t.Errorf("expected learning_links updated, got: %s", ut.LearningLinks)
+	}
+	if ut.ImplementationPlan != "test plan" {
+		t.Errorf("expected implementation_plan updated, got: %s", ut.ImplementationPlan)
+	}
+}
+
+func TestWeekRepo_FindByPhaseWithProgress(t *testing.T) {
+	setupRepo(t)
+	defer database.Close()
+
+	repo := &repository.WeekRepo{DB: database.DB}
+	weeks, err := repo.FindByPhaseWithProgress(1, 1)
+	if err != nil {
+		t.Fatalf("find by phase with progress: %v", err)
+	}
+	if len(weeks) != 4 {
+		t.Errorf("expected 4 weeks, got %d", len(weeks))
+	}
+	for _, w := range weeks {
+		if w.TaskCount == 0 {
+			t.Errorf("Week %d has 0 task_count", w.WeekNumber)
+		}
+	}
+}
+
+func TestDayRepo_FindByWeekWithProgress(t *testing.T) {
+	setupRepo(t)
+	defer database.Close()
+
+	repo := &repository.DayRepo{DB: database.DB}
+	days, err := repo.FindByWeekWithProgress(1, 1)
+	if err != nil {
+		t.Fatalf("find by week with progress: %v", err)
+	}
+	if len(days) != 7 {
+		t.Errorf("expected 7 days, got %d", len(days))
+	}
+}
