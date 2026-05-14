@@ -109,7 +109,7 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 	phaseHandler := handler.NewPhaseHandler(phaseRepo, weekRepo, dayRepo)
 	taskHandler := handler.NewTaskHandler(taskService, taskRepo, userTaskRepo)
 	progressHandler := handler.NewProgressHandler(progressService)
-	pageHandler := handler.NewPageHandler(userRepo, phaseRepo, weekRepo, dayRepo, taskRepo, userTaskRepo, progressService)
+	pageHandler := handler.NewPageHandler(userRepo, phaseRepo, weekRepo, dayRepo, taskRepo, userTaskRepo, progressService, jwtSecret)
 
 	// Public page routes
 	r.GET("/", pageHandler.Landing)
@@ -117,6 +117,7 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 	r.GET("/register", pageHandler.RegisterPage)
 	r.GET("/demo", pageHandler.Demo)
 	r.GET("/logout", func(c *gin.Context) {
+		c.SetCookie("token", "", -1, "/", "", false, true)
 		c.Redirect(302, "/")
 	})
 

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/xyd/web3-learning-tracker/internal/model"
 	"github.com/xyd/web3-learning-tracker/internal/repository"
@@ -19,18 +20,19 @@ type PageHandler struct {
 	taskRepo        *repository.TaskRepo
 	userTaskRepo    *repository.UserTaskRepo
 	progressService *service.ProgressService
+	jwtSecret       string
 }
 
 func NewPageHandler(
 	userRepo *repository.UserRepo, phaseRepo *repository.PhaseRepo,
 	weekRepo *repository.WeekRepo, dayRepo *repository.DayRepo,
 	taskRepo *repository.TaskRepo, userTaskRepo *repository.UserTaskRepo,
-	progressService *service.ProgressService,
+	progressService *service.ProgressService, jwtSecret string,
 ) *PageHandler {
 	return &PageHandler{
 		userRepo: userRepo, phaseRepo: phaseRepo, weekRepo: weekRepo,
 		dayRepo: dayRepo, taskRepo: taskRepo, userTaskRepo: userTaskRepo,
-		progressService: progressService,
+		progressService: progressService, jwtSecret: jwtSecret,
 	}
 }
 
@@ -39,10 +41,18 @@ func (h *PageHandler) Landing(c *gin.Context) {
 }
 
 func (h *PageHandler) LoginPage(c *gin.Context) {
+	if h.isLoggedIn(c) {
+		c.Redirect(http.StatusFound, "/dashboard")
+		return
+	}
 	c.HTML(http.StatusOK, "auth_login.html", gin.H{})
 }
 
 func (h *PageHandler) RegisterPage(c *gin.Context) {
+	if h.isLoggedIn(c) {
+		c.Redirect(http.StatusFound, "/dashboard")
+		return
+	}
 	c.HTML(http.StatusOK, "auth_register.html", gin.H{})
 }
 
@@ -305,4 +315,15 @@ func (h *PageHandler) baseData(c *gin.Context, title, active string, extra gin.H
 		data[k] = v
 	}
 	return data
+}
+
+func (h *PageHandler) isLoggedIn(c *gin.Context) bool {
+	tokenStr, err := c.Cookie("token")
+	if err != nil {
+		return false
+	}
+	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
+		return []byte(h.jwtSecret), nil
+	})
+	return err == nil && token.Valid
 }
