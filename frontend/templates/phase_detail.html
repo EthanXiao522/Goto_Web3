@@ -1,6 +1,6 @@
 {{template "app-layout" .}}
 <div class="phase-detail-page">
-  <h1 class="page-title">{{.Phase.Title}} <span class="phase-badge phase-badge-{{.Phase.PhaseNumber}}">Phase {{.Phase.PhaseNumber}}</span></h1>
+  <h1 class="page-title">{{.Phase.Title}} <span class="phase-badge phase-badge-{{.Phase.PhaseNumber}}">阶段 {{.Phase.PhaseNumber}}</span></h1>
   {{if .Phase.Goal}}<p class="phase-goal">{{.Phase.Goal}}</p>{{end}}
   <div class="accordion">
     {{range $wi, $week := .Weeks}}

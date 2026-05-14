@@ -6,7 +6,7 @@
     <a href="/phases/{{.ID}}" class="phase-card-link">
       <div class="phase-card card-glow-{{phaseColorClass .PhaseNumber}}">
         <div class="phase-card-header">
-          <span class="phase-badge phase-badge-{{.PhaseNumber}}">Phase {{.PhaseNumber}}</span>
+          <span class="phase-badge phase-badge-{{.PhaseNumber}}">阶段 {{.PhaseNumber}}</span>
           <span class="phase-progress-text">{{if .TaskCount}}{{percent .CompletedCount .TaskCount}}{{else}}0{{end}}%</span>
         </div>
         <h3 class="phase-card-title">{{.Title}}</h3>

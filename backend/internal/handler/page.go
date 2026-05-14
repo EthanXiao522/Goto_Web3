@@ -289,7 +289,7 @@ func (h *PageHandler) Gantt(c *gin.Context) {
 }
 
 func (h *PageHandler) Handbook(c *gin.Context) {
-	c.HTML(http.StatusOK, "handbook.html", h.baseData(c, "学习手册", "handbook", gin.H{
+	c.HTML(http.StatusOK, "handbook.html", h.baseData(c, "学习计划书", "handbook", gin.H{
 		"Content": "<p>手册内容将通过 importer 导入后渲染</p>",
 		"TOC":     []gin.H{},
 	}))
@@ -331,11 +331,11 @@ func mockDashboardData() gin.H {
 			{"week_number": 5, "title": "Kafka 深化", "task_count": 18, "completed_count": 0},
 		},
 		"recent_tasks": []gin.H{
-			{"content": "实现 WebSocket 自动重连 + 指数退避", "phase_title": "Phase 1 基础夯实", "week_number": 3, "is_completed": true, "completed_at": "2026-03-21 16:30"},
-			{"content": "创建 event_logs 表并解析 ERC-20 Transfer", "phase_title": "Phase 1 基础夯实", "week_number": 2, "is_completed": true, "completed_at": "2026-03-14 15:20"},
-			{"content": "实现 goroutine + channel 生产者-消费者模型", "phase_title": "Phase 1 基础夯实", "week_number": 1, "is_completed": true, "completed_at": "2026-03-07 11:45"},
-			{"content": "Kafka producer 集成到 Listener", "phase_title": "Phase 2 核心系统", "week_number": 5, "is_completed": false},
-			{"content": "设计 HD 钱包密钥管理方案", "phase_title": "Phase 2 核心系统", "week_number": 6, "is_completed": false},
+			{"content": "实现 WebSocket 自动重连 + 指数退避", "phase_title": "阶段 1 基础夯实", "week_number": 3, "is_completed": true, "completed_at": "2026-03-21 16:30"},
+			{"content": "创建 event_logs 表并解析 ERC-20 Transfer", "phase_title": "阶段 1 基础夯实", "week_number": 2, "is_completed": true, "completed_at": "2026-03-14 15:20"},
+			{"content": "实现 goroutine + channel 生产者-消费者模型", "phase_title": "阶段 1 基础夯实", "week_number": 1, "is_completed": true, "completed_at": "2026-03-07 11:45"},
+			{"content": "Kafka producer 集成到 Listener", "phase_title": "阶段 2 核心系统", "week_number": 5, "is_completed": false},
+			{"content": "设计 HD 钱包密钥管理方案", "phase_title": "阶段 2 核心系统", "week_number": 6, "is_completed": false},
 		},
 	}
 }
@@ -348,7 +348,7 @@ func (h *PageHandler) baseData(c *gin.Context, title, active string, extra gin.H
 	var sidebarPhases []gin.H
 	for _, p := range phases {
 		sidebarPhases = append(sidebarPhases, gin.H{
-			"ID": p.ID, "Title": "Phase " + strconv.Itoa(int(p.PhaseNumber)) + " " + p.Title,
+			"ID": p.ID, "Title": "阶段 " + strconv.Itoa(int(p.PhaseNumber)) + " " + p.Title,
 			"TaskCount": p.TaskCount, "CompletedCount": p.CompletedCount,
 		})
 	}

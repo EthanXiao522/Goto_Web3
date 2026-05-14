@@ -3,21 +3,21 @@
   <!-- Dashboard Progress Cards -->
   <div class="dashboard-block">
     <h2 class="section-title">Dashboard进度卡</h2>
-    <div class="stats-grid">
-      <div class="stat-card card-glow-cyan">
-        <div class="stat-value">{{.Data.Overview.TotalTasks}}</div>
+    <div class="stats-grid stats-grid-four">
+      <div class="stat-card card-glow-teal">
+        <div class="stat-value teal">{{.Data.Overview.TotalTasks}}</div>
         <div class="stat-label">总任务数</div>
       </div>
-      <div class="stat-card card-glow-green">
-        <div class="stat-value">{{.Data.Overview.CompletedTasks}}</div>
+      <div class="stat-card card-glow-emerald">
+        <div class="stat-value emerald">{{.Data.Overview.CompletedTasks}}</div>
         <div class="stat-label">已完成</div>
       </div>
-      <div class="stat-card card-glow-purple">
-        <div class="stat-value">{{.Data.Overview.CompletedPhases}}/{{.Data.Overview.TotalPhases}}</div>
+      <div class="stat-card card-glow-violet">
+        <div class="stat-value violet">{{.Data.Overview.CompletedPhases}}/{{.Data.Overview.TotalPhases}}</div>
         <div class="stat-label">完成阶段</div>
       </div>
-      <div class="stat-card card-glow-cyan">
-        <div class="stat-value">{{if .Data.Overview.TotalTasks}}{{percent .Data.Overview.CompletedTasks .Data.Overview.TotalTasks}}{{else}}0{{end}}%</div>
+      <div class="stat-card card-glow-amber">
+        <div class="stat-value amber">{{if .Data.Overview.TotalTasks}}{{percent .Data.Overview.CompletedTasks .Data.Overview.TotalTasks}}{{else}}0{{end}}%</div>
         <div class="stat-label">总体进度</div>
       </div>
     </div>
@@ -41,7 +41,7 @@
         <div class="phase-ring-title">{{.Title}}</div>
         {{if .Subtitle}}<div class="phase-ring-subtitle">{{.Subtitle}}</div>{{end}}
         <div class="phase-ring-progress">
-          <div class="progress-bar"><div class="progress-fill" style="width:{{if .TaskCount}}{{percent .CompletedCount .TaskCount}}{{else}}0{{end}}%"></div></div>
+          <div class="progress-bar"><div class="progress-fill {{phaseColorClass .PhaseNumber}}" style="width:{{if .TaskCount}}{{percent .CompletedCount .TaskCount}}{{else}}0{{end}}%"></div></div>
           <span>{{.CompletedCount}}/{{.TaskCount}} 任务完成</span>
         </div>
       </div>
@@ -68,7 +68,7 @@
 
   <!-- Gantt Block -->
   <div class="dashboard-block">
-    <h2 class="section-title">甘特图（按周）</h2>
+    <h2 class="section-title">甘特图</h2>
     <div class="landing-gantt-v2 gantt-week-grid">
       <div class="gantt-v2-header">
         <div class="gantt-v2-label"></div>
@@ -83,7 +83,10 @@
       <div class="gantt-v2-row">
         <div class="gantt-v2-label"><span class="phase-dot phase-dot-{{phaseColorClass .PhaseNumber}}"></span>阶段 {{.PhaseNumber}}</div>
         <div class="gantt-v2-bar-area">
-          <div class="gantt-v2-bar gantt-v2-{{phaseColorClass .PhaseNumber}}" style="left:{{ganttLeft .PhaseNumber}}%;width:{{ganttWidth .WeekCount}}%">{{.Title}} {{$pct}}%</div>
+          <div class="gantt-v2-bar" style="left:{{ganttLeft .PhaseNumber}}%;width:{{ganttWidth .WeekCount}}%">
+            <div class="gantt-v2-bar-fill gantt-v2-{{phaseColorClass .PhaseNumber}}" style="width:{{$pct}}%"></div>
+            <span class="gantt-v2-bar-text">{{.Title}} {{$pct}}%</span>
+          </div>
         </div>
       </div>
       {{end}}

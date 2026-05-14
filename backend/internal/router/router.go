@@ -34,13 +34,13 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 			n := toInt(num)
 			switch n {
 			case 1:
-				return "#00f0ff"
+				return "#ffd700"
 			case 2:
-				return "#b347ea"
+				return "#ff4466"
 			case 3:
-				return "#00ff88"
+				return "#4488ff"
 			}
-			return "#00f0ff"
+			return "#ffd700"
 		},
 		"phaseColorClass": func(num any) string {
 			n := toInt(num)
@@ -75,22 +75,22 @@ func Setup(db *sql.DB, jwtSecret string) *gin.Engine {
 			n := toInt(weekNum)
 			switch {
 			case n <= 4:
-				return "#00f0ff"
+				return "#ffd700"
 			case n <= 8:
-				return "#b347ea"
+				return "#ff4466"
 			default:
-				return "#00ff88"
+				return "#4488ff"
 			}
 		},
 		"barGradient": func(weekNum any) template.CSS {
 			n := toInt(weekNum)
 			switch {
 			case n <= 4:
-				return "linear-gradient(180deg,#00f0ff,#00f0ff44)"
+				return "linear-gradient(180deg,#ffd700,#ffd70044)"
 			case n <= 8:
-				return "linear-gradient(180deg,#b347ea,#b347ea44)"
+				return "linear-gradient(180deg,#ff4466,#ff446644)"
 			default:
-				return "linear-gradient(180deg,#00ff88,#00ff8844)"
+				return "linear-gradient(180deg,#4488ff,#4488ff44)"
 			}
 		},
 		"fieldValue": func(ut *model.UserTask, field string) string {

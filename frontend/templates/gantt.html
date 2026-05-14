@@ -12,10 +12,14 @@
       </div>
     </div>
     {{range .Phases}}
+    {{$pct := 0}}{{if .TaskCount}}{{$pct = percent .CompletedCount .TaskCount}}{{end}}
     <div class="gantt-v2-row">
-      <div class="gantt-v2-label"><span class="phase-dot phase-dot-{{phaseColorClass .PhaseNumber}}"></span>Phase {{.PhaseNumber}}</div>
+      <div class="gantt-v2-label"><span class="phase-dot phase-dot-{{phaseColorClass .PhaseNumber}}"></span>阶段 {{.PhaseNumber}}</div>
       <div class="gantt-v2-bar-area">
-        <div class="gantt-v2-bar gantt-v2-{{phaseColorClass .PhaseNumber}}" style="left:{{ganttLeft .PhaseNumber}}%;width:{{ganttWidth .WeekCount}}%">{{.Title}}</div>
+        <div class="gantt-v2-bar" style="left:{{ganttLeft .PhaseNumber}}%;width:{{ganttWidth .WeekCount}}%">
+          <div class="gantt-v2-bar-fill gantt-v2-{{phaseColorClass .PhaseNumber}}" style="width:{{$pct}}%"></div>
+            <span class="gantt-v2-bar-text">{{.Title}} {{$pct}}%</span>
+        </div>
       </div>
     </div>
     {{range .Weeks}}

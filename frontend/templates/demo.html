@@ -56,21 +56,21 @@
   </div>
 
   <h1 class="page-title">Dashboard 仪表盘</h1>
-  <div class="stats-grid">
-    <div class="stat-card card-glow-cyan">
-      <div class="stat-value">{{.MockData.overview.total_tasks}}</div>
+  <div class="stats-grid stats-grid-four">
+    <div class="stat-card card-glow-teal">
+      <div class="stat-value teal">{{.MockData.overview.total_tasks}}</div>
       <div class="stat-label">总任务数</div>
     </div>
-    <div class="stat-card card-glow-green">
-      <div class="stat-value">{{.MockData.overview.completed_tasks}}</div>
+    <div class="stat-card card-glow-emerald">
+      <div class="stat-value emerald">{{.MockData.overview.completed_tasks}}</div>
       <div class="stat-label">已完成</div>
     </div>
-    <div class="stat-card card-glow-purple">
-      <div class="stat-value">{{.MockData.overview.completed_phases}}/{{.MockData.overview.total_phases}}</div>
+    <div class="stat-card card-glow-violet">
+      <div class="stat-value violet">{{.MockData.overview.completed_phases}}/{{.MockData.overview.total_phases}}</div>
       <div class="stat-label">完成阶段</div>
     </div>
-    <div class="stat-card card-glow-cyan">
-      <div class="stat-value">~40%</div>
+    <div class="stat-card card-glow-amber">
+      <div class="stat-value amber">{{if .MockData.overview.total_tasks}}{{percent .MockData.overview.completed_tasks .MockData.overview.total_tasks}}{{else}}0{{end}}%</div>
       <div class="stat-label">总体进度</div>
     </div>
   </div>
@@ -87,22 +87,44 @@
         <text x="60" y="56" text-anchor="middle" fill="var(--text-primary)" font-size="18" font-weight="bold">{{printf "%.0f" .percentage}}%</text>
         <text x="60" y="72" text-anchor="middle" fill="var(--text-muted)" font-size="10">{{.task_count}} 任务</text>
       </svg>
-      <div class="phase-ring-label">Phase {{.phase_number}}</div>
+      <div class="phase-ring-label">阶段 {{.phase_number}}</div>
       <div class="phase-ring-title">{{.title}}</div>
     </div>
     {{end}}
   </div>
 
-  <h2 class="section-title">每周进度（示例）</h2>
-  <div class="week-progress-list">
+  <h2 class="section-title">每周进度</h2>
+  <div class="week-chart">
     {{range .MockData.week_progress}}
-    <div class="week-progress-item">
-      <div class="week-progress-header">
-        <span>第{{.week_number}}周 · {{.title}}</span>
-        <span>{{.completed_count}}/{{.task_count}}</span>
+    {{$pct := 0}}{{if .task_count}}{{$pct = percent .completed_count .task_count}}{{end}}
+    <div class="week-bar-item">
+      <div class="week-bar-label-top">{{.completed_count}}/{{.task_count}} <span class="week-bar-pct">{{$pct}}%</span></div>
+      <div class="week-bar-fill-fixed">
+        <div class="week-bar-done" style="height:{{if .task_count}}{{multiply (percent .completed_count .task_count) 1.2}}{{else}}0{{end}}px;background:{{barColor .week_number}}"></div>
       </div>
-      <div class="progress-bar">
-        <div class="progress-fill" style="width:{{if .task_count}}{{percent .completed_count .task_count}}{{else}}0{{end}}%"></div>
+      <div class="week-bar-label">W{{.week_number}}</div>
+    </div>
+    {{end}}
+  </div>
+
+  <h2 class="section-title">甘特图</h2>
+  <div class="landing-gantt-v2 gantt-week-grid">
+    <div class="gantt-v2-header">
+      <div class="gantt-v2-label"></div>
+      <div class="gantt-v2-weeks">
+        <span>W1</span><span>W2</span><span>W3</span><span>W4</span>
+        <span>W5</span><span>W6</span><span>W7</span><span>W8</span>
+        <span>W9</span><span>W10</span><span>W11</span><span>W12</span>
+      </div>
+    </div>
+    {{range .MockData.phase_progress}}
+    <div class="gantt-v2-row">
+      <div class="gantt-v2-label"><span class="phase-dot phase-dot-{{phaseColorClass .phase_number}}"></span>阶段 {{.phase_number}}</div>
+      <div class="gantt-v2-bar-area">
+        <div class="gantt-v2-bar" style="left:{{ganttLeft .phase_number}}%;width:33.33%">
+          <div class="gantt-v2-bar-fill gantt-v2-{{phaseColorClass .phase_number}}" style="width:{{.percentage}}%"></div>
+          <span class="gantt-v2-bar-text">{{.title}} {{printf "%.0f" .percentage}}%</span>
+        </div>
       </div>
     </div>
     {{end}}
@@ -126,7 +148,7 @@
     {{range .Phases}}
     <div class="phase-card card-glow-{{phaseColorClass .PhaseNumber}}">
       <div class="phase-card-header">
-        <span class="phase-badge phase-badge-{{.PhaseNumber}}">Phase {{.PhaseNumber}}</span>
+        <span class="phase-badge phase-badge-{{.PhaseNumber}}">阶段 {{.PhaseNumber}}</span>
         <span class="phase-progress-text">--</span>
       </div>
       <h3 class="phase-card-title">{{.Title}}</h3>
