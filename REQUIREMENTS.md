@@ -410,7 +410,7 @@ Chrome / Firefox / Edge 最新版，不要求 IE 支持。
 ### 9.2 执行方式
 
 ```bash
-cd backend && go run cmd/seed/main.go --plan=../web3_infra_3month_plan.md
+cd backend && go run cmd/seed/main.go ../sources/web3_infra_3month_plan.md
 ```
 
 幂等导入：INSERT IGNORE，预期导入 3 Phase + 12 Week + 84 Day + ~232 Task。

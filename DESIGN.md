@@ -687,7 +687,7 @@ Browser → GET /phases/1
 ### 7.4 数据导入流程
 
 ```bash
-go run cmd/seed/main.go --plan=../web3_infra_3month_plan.md
+go run cmd/seed/main.go ../sources/web3_infra_3month_plan.md
 ```
 
 ```

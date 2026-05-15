@@ -84,7 +84,7 @@ export JWT_SECRET="your-secret-key"
 export PORT=8080
 
 # 3. 导入学习计划数据
-cd backend && go run cmd/seed/main.go --plan=../sources/web3_infra_3month_plan.md
+cd backend && go run cmd/seed/main.go ../sources/web3_infra_3month_plan.md
 
 # 4. 启动服务
 go run cmd/server/main.go
@@ -96,6 +96,25 @@ go run cmd/server/main.go
 ```bash
 docker-compose up -d
 # MySQL 8.0 + Go App 一键启动，访问 http://localhost:8080
+```
+
+### 架构说明：
+ 本项目是 Go SSR（服务端渲染），没有独立的前端服务。go run cmd/server/main.go 一个命令同时启动：
+
+- API 服务（/api/v1/*）
+- 页面渲染（/, /dashboard, /tasks, /handbook 等）
+- 静态资源（/static/css/style.css, /static/js/app.js）
+
+#### 日常开发命令：
+```
+# 启动:根目录执行
+cd backend && go run cmd/server/main.go
+
+# 导入/更新种子数据:根目录执行
+cd backend && go run cmd/seed/main.go ../sources/web3_infra_3month_plan.md
+
+# 运行测试:根目录执行
+cd backend && go test -v ./test/
 ```
 
 ### 目录结构
