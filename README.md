@@ -109,12 +109,15 @@ docker-compose up -d
 ```
 # 启动:根目录执行
 cd backend && go run cmd/server/main.go
+cd ../
 
 # 导入/更新种子数据:根目录执行
 cd backend && go run cmd/seed/main.go ../sources/web3_infra_3month_plan.md
+cd ../
 
 # 运行测试:根目录执行
 cd backend && go test -v ./test/
+cd ../
 ```
 
 ### 目录结构
