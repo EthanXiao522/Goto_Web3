@@ -1,0 +1,12 @@
+# Goto Web3 Server Configuration
+port: "8080"
+
+database:
+  host: "127.0.0.1"
+  port: "3306"
+  name: "goto_web3"
+  charset: "utf8mb4"
+  params: "parseTime=true"
+
+jwt:
+  secret: "dev-secret-change-in-production"

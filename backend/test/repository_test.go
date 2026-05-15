@@ -15,7 +15,7 @@ func uniqueName(prefix string) string {
 	return fmt.Sprintf("%s_%d", prefix, time.Now().UnixNano())
 }
 
-func setupRepo(t *testing.T) {
+func setupRepo(t *testing.T) (uid uint64) {
 	t.Helper()
 	cfg := config.Load()
 	if err := database.Connect(cfg.DBDSN); err != nil {
@@ -24,6 +24,13 @@ func setupRepo(t *testing.T) {
 	if err := database.Migrate(); err != nil {
 		t.Fatalf("migrate: %v", err)
 	}
+	userRepo := &repository.UserRepo{DB: database.DB}
+	u := &model.User{Username: uniqueName("repousr"), Email: uniqueName("repo") + "@test.com", PasswordHash: "$2a$12$dummy"}
+	id, err := userRepo.Create(u)
+	if err != nil {
+		t.Fatalf("create test user: %v", err)
+	}
+	return id
 }
 
 func TestUserRepo_CreateAndFind(t *testing.T) {
@@ -137,19 +144,19 @@ func TestTaskRepo_FindByDay(t *testing.T) {
 }
 
 func TestUserTaskRepo_LazyCreate(t *testing.T) {
-	setupRepo(t)
+	uid := setupRepo(t)
 	defer database.Close()
 
 	repo := &repository.UserTaskRepo{DB: database.DB}
-	ut, err := repo.LazyCreate(1, 1)
+	ut, err := repo.LazyCreate(uid, 1)
 	if err != nil {
 		t.Fatalf("lazy create: %v", err)
 	}
-	if ut.TaskID != 1 || ut.UserID != 1 {
+	if ut.TaskID != 1 || ut.UserID != uid {
 		t.Errorf("unexpected user_task: %+v", ut)
 	}
 
-	ut2, err := repo.LazyCreate(1, 1)
+	ut2, err := repo.LazyCreate(uid, 1)
 	if err != nil {
 		t.Fatalf("second lazy create: %v", err)
 	}
@@ -159,15 +166,16 @@ func TestUserTaskRepo_LazyCreate(t *testing.T) {
 }
 
 func TestUserTaskRepo_UpdateComplete(t *testing.T) {
-	setupRepo(t)
+	uid := setupRepo(t)
 	defer database.Close()
 
 	repo := &repository.UserTaskRepo{DB: database.DB}
-	if err := repo.UpdateComplete(1, 1, true); err != nil {
+	repo.LazyCreate(uid, 1) // ensure user_task exists first
+	if err := repo.UpdateComplete(uid, 1, true); err != nil {
 		t.Fatalf("update complete: %v", err)
 	}
 
-	ut, err := repo.FindByUserAndTask(1, 1)
+	ut, err := repo.FindByUserAndTask(uid, 1)
 	if err != nil {
 		t.Fatalf("find: %v", err)
 	}
@@ -175,7 +183,7 @@ func TestUserTaskRepo_UpdateComplete(t *testing.T) {
 		t.Error("expected completed")
 	}
 
-	if err := repo.UpdateComplete(1, 1, false); err != nil {
+	if err := repo.UpdateComplete(uid, 1, false); err != nil {
 		t.Fatalf("update uncomplete: %v", err)
 	}
 }
@@ -223,12 +231,12 @@ func TestTaskRepo_FindIDsByDay(t *testing.T) {
 }
 
 func TestUserTaskRepo_FindByUserAndTaskIDs(t *testing.T) {
-	setupRepo(t)
+	uid := setupRepo(t)
 	defer database.Close()
 
 	repo := &repository.UserTaskRepo{DB: database.DB}
 	ids := []uint64{1, 2, 3, 10, 20}
-	result, err := repo.FindByUserAndTaskIDs(1, ids)
+	result, err := repo.FindByUserAndTaskIDs(uid, ids)
 	if err != nil {
 		t.Fatalf("find by user and task ids: %v", err)
 	}
@@ -240,21 +248,21 @@ func TestUserTaskRepo_FindByUserAndTaskIDs(t *testing.T) {
 }
 
 func TestUserTaskRepo_UpdateFields(t *testing.T) {
-	setupRepo(t)
+	uid := setupRepo(t)
 	defer database.Close()
 
 	repo := &repository.UserTaskRepo{DB: database.DB}
-	repo.LazyCreate(1, 1)
+	repo.LazyCreate(uid, 1)
 
 	fields := map[string]string{
 		"learning_links":     "https://go.dev/tour",
 		"implementation_plan": "test plan",
 	}
-	if err := repo.UpdateFields(1, 1, fields); err != nil {
+	if err := repo.UpdateFields(uid, 1, fields); err != nil {
 		t.Fatalf("update fields: %v", err)
 	}
 
-	ut, err := repo.FindByUserAndTask(1, 1)
+	ut, err := repo.FindByUserAndTask(uid, 1)
 	if err != nil {
 		t.Fatalf("find after update fields: %v", err)
 	}
@@ -267,11 +275,11 @@ func TestUserTaskRepo_UpdateFields(t *testing.T) {
 }
 
 func TestWeekRepo_FindByPhaseWithProgress(t *testing.T) {
-	setupRepo(t)
+	uid := setupRepo(t)
 	defer database.Close()
 
 	repo := &repository.WeekRepo{DB: database.DB}
-	weeks, err := repo.FindByPhaseWithProgress(1, 1)
+	weeks, err := repo.FindByPhaseWithProgress(1, uid)
 	if err != nil {
 		t.Fatalf("find by phase with progress: %v", err)
 	}
@@ -286,11 +294,11 @@ func TestWeekRepo_FindByPhaseWithProgress(t *testing.T) {
 }
 
 func TestDayRepo_FindByWeekWithProgress(t *testing.T) {
-	setupRepo(t)
+	uid := setupRepo(t)
 	defer database.Close()
 
 	repo := &repository.DayRepo{DB: database.DB}
-	days, err := repo.FindByWeekWithProgress(1, 1)
+	days, err := repo.FindByWeekWithProgress(1, uid)
 	if err != nil {
 		t.Fatalf("find by week with progress: %v", err)
 	}

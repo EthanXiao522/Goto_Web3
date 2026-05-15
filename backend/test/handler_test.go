@@ -13,12 +13,24 @@ import (
 	"github.com/xyd/web3-learning-tracker/internal/config"
 	"github.com/xyd/web3-learning-tracker/internal/database"
 	"github.com/xyd/web3-learning-tracker/internal/handler"
+	"github.com/xyd/web3-learning-tracker/internal/model"
 	"github.com/xyd/web3-learning-tracker/internal/repository"
 	"github.com/xyd/web3-learning-tracker/internal/service"
 )
 
 func uniqueNameH(prefix string) string {
 	return fmt.Sprintf("%s_%d", prefix, time.Now().UnixNano())
+}
+
+func setupTestUser(t *testing.T) uint64 {
+	t.Helper()
+	userRepo := &repository.UserRepo{DB: database.DB}
+	u := &model.User{Username: uniqueNameH("testusr"), Email: uniqueNameH("test") + "@test.com", PasswordHash: "$2a$12$dummyhash"}
+	id, err := userRepo.Create(u)
+	if err != nil {
+		t.Fatalf("create test user: %v", err)
+	}
+	return id
 }
 
 func setupHandler(t *testing.T) (*gin.Engine, string) {
@@ -32,6 +44,8 @@ func setupHandler(t *testing.T) (*gin.Engine, string) {
 	}
 	t.Cleanup(func() { database.Close() })
 
+	uid := setupTestUser(t)
+
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 
@@ -42,7 +56,7 @@ func setupHandler(t *testing.T) (*gin.Engine, string) {
 	r.POST("/api/v1/auth/register", authHandler.Register)
 	r.POST("/api/v1/auth/login", authHandler.Login)
 	r.GET("/api/v1/auth/me", func(c *gin.Context) {
-		c.Set("user_id", uint64(1))
+		c.Set("user_id", uid)
 		c.Next()
 	}, authHandler.Me)
 
@@ -95,7 +109,16 @@ func TestAuthHandler_RegisterDuplicate(t *testing.T) {
 func TestAuthHandler_Login(t *testing.T) {
 	r, _ := setupHandler(t)
 
-	body := map[string]string{"email": "test@test.com", "password": "123456"}
+	// Register a user first, then login
+	uname := uniqueNameH("login_test")
+	regBody := map[string]string{"username": uname, "email": uname + "@test.com", "password": "test123"}
+	regB, _ := json.Marshal(regBody)
+	regReq := httptest.NewRequest("POST", "/api/v1/auth/register", bytes.NewReader(regB))
+	regReq.Header.Set("Content-Type", "application/json")
+	regW := httptest.NewRecorder()
+	r.ServeHTTP(regW, regReq)
+
+	body := map[string]string{"email": uname + "@test.com", "password": "test123"}
 	b, _ := json.Marshal(body)
 	req := httptest.NewRequest("POST", "/api/v1/auth/login", bytes.NewReader(b))
 	req.Header.Set("Content-Type", "application/json")
@@ -103,7 +126,7 @@ func TestAuthHandler_Login(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	if w.Code != 200 {
-		t.Errorf("expected 200, got %d: %s", w.Code, w.Body.String())
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
 	}
 
 	var resp map[string]interface{}
@@ -152,6 +175,8 @@ func setupTaskHandler(t *testing.T) *gin.Engine {
 	}
 	t.Cleanup(func() { database.Close() })
 
+	uid := setupTestUser(t)
+
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 
@@ -161,7 +186,7 @@ func setupTaskHandler(t *testing.T) *gin.Engine {
 	taskHandler := handler.NewTaskHandler(taskService, taskRepo, userTaskRepo)
 
 	auth := func(c *gin.Context) {
-		c.Set("user_id", uint64(1))
+		c.Set("user_id", uid)
 		c.Next()
 	}
 
@@ -295,6 +320,8 @@ func setupPhaseHandler(t *testing.T) *gin.Engine {
 	}
 	t.Cleanup(func() { database.Close() })
 
+	uid := setupTestUser(t)
+
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 
@@ -304,7 +331,7 @@ func setupPhaseHandler(t *testing.T) *gin.Engine {
 	phaseHandler := handler.NewPhaseHandler(phaseRepo, weekRepo, dayRepo)
 
 	auth := func(c *gin.Context) {
-		c.Set("user_id", uint64(1))
+		c.Set("user_id", uid)
 		c.Next()
 	}
 
@@ -399,6 +426,8 @@ func setupProgressHandler(t *testing.T) *gin.Engine {
 	}
 	t.Cleanup(func() { database.Close() })
 
+	uid := setupTestUser(t)
+
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 
@@ -406,7 +435,7 @@ func setupProgressHandler(t *testing.T) *gin.Engine {
 	progressHandler := handler.NewProgressHandler(progressService)
 
 	auth := func(c *gin.Context) {
-		c.Set("user_id", uint64(1))
+		c.Set("user_id", uid)
 		c.Next()
 	}
 

@@ -15,7 +15,7 @@ func Migrate() error {
 
 		`CREATE TABLE IF NOT EXISTS phases (
 			id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-			phase_number TINYINT UNSIGNED NOT NULL,
+			phase_number TINYINT UNSIGNED NOT NULL UNIQUE,
 			title VARCHAR(255) NOT NULL,
 			subtitle VARCHAR(255) DEFAULT '',
 			goal TEXT,
@@ -44,7 +44,7 @@ func Migrate() error {
 			day_number TINYINT UNSIGNED NOT NULL,
 			title VARCHAR(255) NOT NULL,
 			sort_order INT NOT NULL DEFAULT 0,
-			INDEX idx_days_week (week_id, sort_order),
+			UNIQUE INDEX idx_days_week_day (week_id, day_number),
 			FOREIGN KEY (week_id) REFERENCES weeks(id) ON DELETE CASCADE
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
@@ -57,7 +57,7 @@ func Migrate() error {
 			sort_order INT NOT NULL DEFAULT 0,
 			is_checkpoint TINYINT(1) DEFAULT 0,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			INDEX idx_tasks_day (day_id, sort_order),
+			UNIQUE INDEX idx_tasks_day_sort (day_id, sort_order),
 			FOREIGN KEY (day_id) REFERENCES days(id) ON DELETE CASCADE
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
@@ -85,5 +85,11 @@ func Migrate() error {
 			return fmt.Errorf("migrate: %w", err)
 		}
 	}
+
+	// Ensure unique constraints on existing tables (idempotent, ignore "Duplicate" errors)
+	DB.Exec("ALTER TABLE phases ADD UNIQUE INDEX uq_phase_number (phase_number)")
+	DB.Exec("ALTER TABLE days ADD UNIQUE INDEX idx_days_week_day (week_id, day_number)")
+	DB.Exec("ALTER TABLE tasks ADD UNIQUE INDEX idx_tasks_day_sort (day_id, sort_order)")
+
 	return nil
 }
